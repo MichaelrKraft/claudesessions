@@ -1,0 +1,18 @@
+#!/bin/bash
+# Launch the Claude Code Session Archive Web UI
+
+SCRIPT_DIR="$HOME/.claude/session-archiver"
+PORT="${1:-3456}"
+
+# Initialize database if needed
+if [ ! -f "$HOME/.claude/session-archives/sessions.db" ]; then
+    echo "Initializing database..."
+    "$SCRIPT_DIR/db-manager.sh" init
+    "$SCRIPT_DIR/db-manager.sh" reindex
+fi
+
+echo "Starting web UI on port $PORT..."
+echo "Open http://localhost:$PORT in your browser"
+echo ""
+
+node "$SCRIPT_DIR/web/server.js" "$PORT"

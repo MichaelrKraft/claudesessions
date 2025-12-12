@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - Claude Sessions</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --accent: #d97706;
+            --accent-hover: #f59e0b;
+            --border: #2a2a3a;
+            --code-bg: #0d0d12;
+            --success: #22c55e;
+            --pro: #8b5cf6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo span { color: var(--accent); }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover { color: var(--text-primary); }
+
+        /* Sidebar */
+        .docs-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .sidebar {
+            border-right: 1px solid var(--border);
+            padding-right: 2rem;
+        }
+
+        .sidebar h3 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            margin-top: 2rem;
+        }
+
+        .sidebar h3:first-child { margin-top: 0; }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: block;
+            padding: 0.5rem 0;
+            border-left: 2px solid transparent;
+            padding-left: 1rem;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            color: var(--text-primary);
+            border-left-color: var(--accent);
+        }
+
+        .sidebar .pro-badge {
+            background: var(--pro);
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        /* Main Content */
+        .content {
+            max-width: 800px;
+        }
+
+        .content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h2 {
+            font-size: 1.5rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .content h3 {
+            font-size: 1.25rem;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .content p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .content code {
+            background: var(--code-bg);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+
+        .content pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .content pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+        }
+
+        /* Feature comparison table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+        }
+
+        .comparison-table td:nth-child(2),
+        .comparison-table td:nth-child(3),
+        .comparison-table th:nth-child(2),
+        .comparison-table th:nth-child(3) {
+            text-align: center;
+        }
+
+        .check { color: var(--success); }
+        .pro-only { color: var(--pro); }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .card h4 {
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+        }
+
+        .card-free { border-color: var(--success); }
+        .card-pro { border-color: var(--pro); }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .badge-free { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .badge-pro { background: rgba(139, 92, 246, 0.2); color: var(--pro); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .docs-layout {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding-right: 0;
+                padding-bottom: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="../web/landing.html" class="logo">claude<span>sessions</span></a>
+        <div class="nav-links">
+            <a href="../web/landing.html">Home</a>
+            <a href="https://github.com/michaelkraft/claudesessions">GitHub</a>
+            <a href="pricing.html">Pricing</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="docs-layout">
+            <aside class="sidebar">
+                <h3>Getting Started</h3>
+                <ul>
+                    <li><a href="index.html" class="active">Introduction</a></li>
+                    <li><a href="installation.html">Installation</a></li>
+                    <li><a href="quickstart.html">Quick Start</a></li>
+                </ul>
+
+                <h3>Core Features</h3>
+                <ul>
+                    <li><a href="auto-archive.html">Auto-Archive</a></li>
+                    <li><a href="search.html">Search</a></li>
+                    <li><a href="checkpoints.html">Checkpoints</a></li>
+                    <li><a href="web-ui.html">Web Dashboard</a></li>
+                </ul>
+
+                <h3>Advanced</h3>
+                <ul>
+                    <li><a href="cli-reference.html">CLI Reference</a></li>
+                    <li><a href="configuration.html">Configuration</a></li>
+                    <li><a href="api.html">API Reference</a></li>
+                </ul>
+
+                <h3>Pro Features</h3>
+                <ul>
+                    <li><a href="pro-overview.html">Pro Overview <span class="pro-badge">PRO</span></a></li>
+                    <li><a href="team-sync.html">Team Sync <span class="pro-badge">PRO</span></a></li>
+                    <li><a href="ai-summaries.html">AI Summaries <span class="pro-badge">PRO</span></a></li>
+                    <li><a href="integrations.html">Integrations <span class="pro-badge">PRO</span></a></li>
+                </ul>
+            </aside>
+
+            <main class="content">
+                <h1>Claude Sessions Documentation</h1>
+                <p>Welcome to Claude Sessions - the open source session archiver for Claude Code. Never lose context again.</p>
+
+                <h2>What is Claude Sessions?</h2>
+                <p>Claude Sessions automatically archives your Claude Code conversations, making them searchable and resumable. It uses Claude Code's hook system to capture sessions when you exit, extracts key information, and stores everything in a local SQLite database.</p>
+
+                <h2>Open Core Model</h2>
+                <p>Claude Sessions follows an open core model: the core functionality is free and open source forever, while advanced features for teams and power users are available in Claude Sessions Pro.</p>
+
+                <div class="card-grid">
+                    <div class="card card-free">
+                        <span class="badge badge-free">Free & Open Source</span>
+                        <h4>Claude Sessions Core</h4>
+                        <p>Everything you need for personal session management. Auto-archive, search, checkpoints, and web dashboard.</p>
+                    </div>
+                    <div class="card card-pro">
+                        <span class="badge badge-pro">Pro</span>
+                        <h4>Claude Sessions Pro</h4>
+                        <p>Access your sessions from anywhere. Cloud backup, multi-device sync, and team collaboration.</p>
+                    </div>
+                </div>
+
+                <h2>Feature Comparison</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Free</th>
+                            <th>Pro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Auto-archive on session exit</td>
+                            <td class="check">&#10003;</td>
+                            <td class="check">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <td>Full-text search (SQLite FTS5)</td>
+                            <td class="check">&#10003;</td>
+                            <td class="check">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <td>Manual checkpoints (/checkpoint)</td>
+                            <td class="check">&#10003;</td>
+                            <td class="check">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <td>Web dashboard</td>
+                            <td class="check">&#10003;</td>
+                            <td class="check">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <td>CLI tools</td>
+                            <td class="check">&#10003;</td>
+                            <td class="check">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <td>Export (JSON, Markdown)</td>
+                            <td class="check">&#10003;</td>
+                            <td class="check">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <td>Local-only storage</td>
+                            <td class="check">&#10003;</td>
+                            <td class="check">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <td>Encrypted cloud backup</td>
+                            <td>-</td>
+                            <td class="pro-only">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <td>Multi-device sync</td>
+                            <td>-</td>
+                            <td class="pro-only">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <td>Team workspaces</td>
+                            <td>-</td>
+                            <td class="pro-only">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <td>Mobile access</td>
+                            <td>-</td>
+                            <td class="pro-only">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <td>Shared team search</td>
+                            <td>-</td>
+                            <td class="pro-only">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <td>Permission controls</td>
+                            <td>-</td>
+                            <td class="pro-only">&#10003;</td>
+                        </tr>
+                        <tr>
+                            <td>Priority support</td>
+                            <td>-</td>
+                            <td class="pro-only">&#10003;</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>Quick Install</h2>
+                <pre><code>curl -fsSL https://claudesessions.com/install.sh | bash</code></pre>
+
+                <p>Or clone and install manually:</p>
+                <pre><code>git clone https://github.com/michaelkraft/claudesessions.git ~/.claudesessions
+~/.claudesessions/install.sh</code></pre>
+
+                <h2>Next Steps</h2>
+                <ul style="color: var(--text-secondary); margin-left: 1.5rem;">
+                    <li><a href="installation.html" style="color: var(--accent);">Installation Guide</a> - Detailed setup instructions</li>
+                    <li><a href="quickstart.html" style="color: var(--accent);">Quick Start</a> - Get up and running in 5 minutes</li>
+                    <li><a href="cli-reference.html" style="color: var(--accent);">CLI Reference</a> - All available commands</li>
+                </ul>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

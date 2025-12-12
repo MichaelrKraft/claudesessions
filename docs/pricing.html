@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - Claude Sessions</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --accent: #d97706;
+            --border: #2a2a3a;
+            --success: #22c55e;
+            --pro: #8b5cf6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo span { color: var(--accent); }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 4rem;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .pricing-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            position: relative;
+        }
+
+        .pricing-card.featured {
+            border-color: var(--pro);
+            transform: scale(1.05);
+        }
+
+        .featured-badge {
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: var(--pro);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            min-height: 60px;
+        }
+
+        .price {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-note {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            margin-bottom: 2rem;
+            transition: all 0.2s;
+        }
+
+        .cta-primary {
+            background: var(--pro);
+            color: white;
+        }
+
+        .cta-primary:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+        }
+
+        .cta-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .cta-secondary:hover {
+            border-color: var(--text-secondary);
+        }
+
+        .features-list {
+            list-style: none;
+        }
+
+        .features-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .features-list li:last-child {
+            border-bottom: none;
+        }
+
+        .check {
+            color: var(--success);
+            font-size: 1.2rem;
+        }
+
+        .faq {
+            margin-top: 4rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .faq h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .faq-item h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .faq-item p {
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="../web/landing.html" class="logo">claude<span>sessions</span></a>
+    </header>
+
+    <div class="container">
+        <h1>Simple, Transparent Pricing</h1>
+        <p class="subtitle">Start free. Upgrade when you need cloud sync and team collaboration.</p>
+
+        <div class="pricing-grid">
+            <!-- Free Plan -->
+            <div class="pricing-card">
+                <div class="plan-name">Free</div>
+                <div class="plan-description">Perfect for individual developers who want session archiving and search.</div>
+                <div class="price">$0</div>
+                <div class="price-note">Forever free</div>
+                <a href="https://github.com/michaelkraft/claudesessions" class="cta-button cta-secondary">Get Started</a>
+                <ul class="features-list">
+                    <li><span class="check">✓</span> Auto-archive sessions</li>
+                    <li><span class="check">✓</span> Full-text search</li>
+                    <li><span class="check">✓</span> Manual checkpoints</li>
+                    <li><span class="check">✓</span> Web dashboard</li>
+                    <li><span class="check">✓</span> CLI tools</li>
+                    <li><span class="check">✓</span> Export (JSON/Markdown)</li>
+                    <li><span class="check">✓</span> Local-only storage</li>
+                    <li><span class="check">✓</span> Open source (MIT)</li>
+                </ul>
+            </div>
+
+            <!-- Individual Pro Plan -->
+            <div class="pricing-card featured">
+                <span class="featured-badge">Most Popular</span>
+                <div class="plan-name">Individual Pro</div>
+                <div class="plan-description">Access your sessions from anywhere with cloud sync and mobile access.</div>
+                <div class="price">$8<span style="font-size: 1.5rem; font-weight: 400;">/mo</span></div>
+                <div class="price-note">Billed monthly</div>
+                <a href="#" class="cta-button cta-primary">Coming Soon</a>
+                <ul class="features-list">
+                    <li><span class="check">✓</span> Everything in Free</li>
+                    <li><span class="check">✓</span> Encrypted cloud backup</li>
+                    <li><span class="check">✓</span> Multi-device sync</li>
+                    <li><span class="check">✓</span> Mobile access</li>
+                    <li><span class="check">✓</span> Priority support</li>
+                </ul>
+            </div>
+
+            <!-- Team Pro Plan -->
+            <div class="pricing-card">
+                <div class="plan-name">Team Pro</div>
+                <div class="plan-description">Shared workspaces with team collaboration and permission controls.</div>
+                <div class="price">$15<span style="font-size: 1.5rem; font-weight: 400;">/user/mo</span></div>
+                <div class="price-note">Minimum 3 users</div>
+                <a href="#" class="cta-button cta-secondary">Coming Soon</a>
+                <ul class="features-list">
+                    <li><span class="check">✓</span> Everything in Individual Pro</li>
+                    <li><span class="check">✓</span> Team workspaces</li>
+                    <li><span class="check">✓</span> Shared team search</li>
+                    <li><span class="check">✓</span> Permission controls</li>
+                    <li><span class="check">✓</span> Admin dashboard</li>
+                    <li><span class="check">✓</span> Dedicated support</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="faq">
+            <h2>Frequently Asked Questions</h2>
+
+            <div class="faq-item">
+                <h3>Is the free version really free forever?</h3>
+                <p>Yes. The core features (auto-archive, search, checkpoints, web UI) will always be free and open source under the MIT license.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>What's the difference between Free and Pro?</h3>
+                <p>Free is 100% local-only. Pro adds encrypted cloud backup, multi-device sync, and mobile access. Team Pro adds shared workspaces and collaboration features.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Can I use Claude Sessions commercially on the free plan?</h3>
+                <p>Yes! The MIT license allows commercial use. Pro is optional for teams who need collaboration features.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>When will Pro be available?</h3>
+                <p>We're launching Pro Q1 2025. Sign up for early access at the GitHub repo.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Do you offer discounts for students or open source projects?</h3>
+                <p>Yes! Contact us at hello@claudesessions.com with proof of student status or open source work.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>What payment methods do you accept?</h3>
+                <p>We'll accept all major credit cards and PayPal when Pro launches. Annual plans will get 2 months free.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

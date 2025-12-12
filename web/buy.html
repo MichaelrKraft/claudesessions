@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Credits - Claude Sessions</title>
+    <meta name="description" content="Get session restoration credits for Claude Sessions. Pick up any saved session where you left off.">
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --accent: #d97706;
+            --accent-hover: #f59e0b;
+            --border: #2a2a3a;
+            --success: #22c55e;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 480px;
+            width: 100%;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo a {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .card-header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-header p {
+            color: var(--text-secondary);
+        }
+
+        .pricing {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .price {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .price-details {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .features {
+            margin-bottom: 2rem;
+        }
+
+        .feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .feature-icon {
+            color: var(--success);
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        .feature-text {
+            line-height: 1.4;
+        }
+
+        /* Email input */
+        .email-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .email-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .email-group input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .email-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .email-group input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .checkout-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .secure-note {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .secure-note svg {
+            width: 14px;
+            height: 14px;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Success State */
+        .success-container {
+            display: none;
+            text-align: center;
+        }
+
+        .success-container.show {
+            display: block;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-container h2 {
+            color: var(--success);
+            margin-bottom: 1rem;
+        }
+
+        .license-key {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            word-break: break-all;
+        }
+
+        .license-key code {
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .copy-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .copy-btn:hover {
+            background: var(--border);
+        }
+
+        .activation-instructions {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+
+        .activation-instructions h4 {
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .activation-instructions code {
+            display: block;
+            background: var(--bg-primary);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-family: 'SF Mono', monospace;
+            color: var(--success);
+        }
+
+        .checkout-form {
+            display: block;
+        }
+
+        .checkout-form.hide {
+            display: none;
+        }
+
+        /* Setup notice */
+        .setup-notice {
+            background: rgba(217, 119, 6, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--accent);
+            display: none;
+        }
+
+        .setup-notice.show {
+            display: block;
+        }
+
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        footer a:hover {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <a href="/">claude<span>sessions</span></a>
+        </div>
+
+        <div class="card">
+            <div class="checkout-form" id="checkoutForm">
+                <div class="card-header">
+                    <h1>Session Restore Credits</h1>
+                    <p>Pick up any saved session where you left off</p>
+                </div>
+
+                <div class="pricing">
+                    <div class="price">$10</div>
+                    <div class="price-details">20 session restores (50 cents each)</div>
+                </div>
+
+                <div class="features">
+                    <div class="feature">
+                        <span class="feature-icon">&#10003;</span>
+                        <span class="feature-text">Restore any archived session, no matter how old</span>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">&#10003;</span>
+                        <span class="feature-text">AI-extracted key points for efficient context loading</span>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">&#10003;</span>
+                        <span class="feature-text">Credits never expire - use them whenever you need</span>
+                    </div>
+                    <div class="feature">
+                        <span class="feature-icon">&#10003;</span>
+                        <span class="feature-text">Instant activation with one terminal command</span>
+                    </div>
+                </div>
+
+                <div class="error-message" id="errorMessage"></div>
+
+                <div class="setup-notice" id="setupNotice">
+                    <strong>Setup Required:</strong> Stripe is not configured yet. Add your Stripe keys to enable payments.
+                </div>
+
+                <div class="email-group">
+                    <label for="email">Email (for receipt and license key)</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                </div>
+
+                <button class="checkout-btn" id="checkoutBtn" onclick="handleCheckout()">
+                    Get 20 Credits - $10
+                </button>
+
+                <p class="secure-note">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clip-rule="evenodd" />
+                    </svg>
+                    Secure payment via Stripe
+                </p>
+            </div>
+
+            <div class="success-container" id="successContainer">
+                <div class="success-icon">&#127881;</div>
+                <h2>Payment Successful!</h2>
+                <p>Your 20 credits are ready to use.</p>
+
+                <div class="license-key">
+                    <code id="licenseKey">cs_XXXXXXXXXXXXXXXXXXXX</code>
+                </div>
+
+                <button class="copy-btn" onclick="copyKey()">Copy License Key</button>
+
+                <div class="activation-instructions">
+                    <h4>Activate in your terminal:</h4>
+                    <code id="activationCommand">sessions activate cs_XXXXXXXXXXXXXXXXXXXX</code>
+                </div>
+
+                <p style="margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    We've also emailed your license key to you.
+                </p>
+            </div>
+        </div>
+
+        <footer>
+            <a href="/">&#8592; Back to Claude Sessions</a>
+        </footer>
+    </div>
+
+    <script>
+        // ============================================================
+        // STRIPE CONFIGURATION
+        // ============================================================
+        //
+        // To enable Stripe payments:
+        //
+        // 1. Create a product in Stripe Dashboard:
+        //    - Go to: https://dashboard.stripe.com/products
+        //    - Create a product called "Claude Sessions Credits"
+        //    - Set price: $10.00 (one-time)
+        //
+        // 2. Create a Payment Link or use Checkout Sessions:
+        //    - For simple setup: Create a Payment Link in Stripe Dashboard
+        //    - For custom flow: Set up a backend endpoint for Checkout Sessions
+        //
+        // 3. Replace this placeholder with your Stripe publishable key:
+        const STRIPE_PUBLISHABLE_KEY = 'pk_live_51SHsbQRy8ot1yV5EllrMrRln';
+
+        // 4. For Payment Links (simplest option):
+        //    Replace with your Stripe Payment Link URL
+        const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/4gM8wR799gwe9MiciEaMU00';
+
+        // 5. For Checkout Sessions (requires backend):
+        //    Set this to your backend endpoint that creates Checkout Sessions
+        const CHECKOUT_SESSION_ENDPOINT = '/api/create-checkout-session';
+
+        // Which method to use: 'payment_link' or 'checkout_session'
+        const PAYMENT_METHOD = 'payment_link';
+
+        // ============================================================
+
+        let stripe = null;
+
+        // Initialize Stripe if key is configured
+        if (STRIPE_PUBLISHABLE_KEY && !STRIPE_PUBLISHABLE_KEY.includes('YOUR_KEY')) {
+            stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+        } else {
+            // Show setup notice if Stripe isn't configured
+            document.getElementById('setupNotice').classList.add('show');
+        }
+
+        async function handleCheckout() {
+            const email = document.getElementById('email').value.trim();
+            const btn = document.getElementById('checkoutBtn');
+            const errorEl = document.getElementById('errorMessage');
+
+            // Validate email
+            if (!email || !email.includes('@')) {
+                errorEl.textContent = 'Please enter a valid email address.';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            errorEl.classList.remove('show');
+
+            // Check if Stripe is configured
+            if (!stripe && PAYMENT_METHOD === 'checkout_session') {
+                errorEl.textContent = 'Payment system not configured. Please contact support.';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Redirecting to Stripe...';
+
+            try {
+                if (PAYMENT_METHOD === 'payment_link') {
+                    // Simple: Redirect to Stripe Payment Link
+                    // Add email as prefill parameter
+                    const paymentUrl = new URL(STRIPE_PAYMENT_LINK);
+                    paymentUrl.searchParams.set('prefilled_email', email);
+                    window.location.href = paymentUrl.toString();
+
+                } else if (PAYMENT_METHOD === 'checkout_session') {
+                    // Advanced: Create Checkout Session via backend
+                    const response = await fetch(CHECKOUT_SESSION_ENDPOINT, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email }),
+                    });
+
+                    const session = await response.json();
+
+                    if (session.error) {
+                        throw new Error(session.error);
+                    }
+
+                    // Redirect to Stripe Checkout
+                    const result = await stripe.redirectToCheckout({
+                        sessionId: session.id,
+                    });
+
+                    if (result.error) {
+                        throw new Error(result.error.message);
+                    }
+                }
+            } catch (error) {
+                console.error('Checkout error:', error);
+                errorEl.textContent = error.message || 'Something went wrong. Please try again.';
+                errorEl.classList.add('show');
+                btn.disabled = false;
+                btn.textContent = 'Get 20 Credits - $10';
+            }
+        }
+
+        function copyKey() {
+            const key = document.getElementById('licenseKey').textContent;
+            navigator.clipboard.writeText(key).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = 'Copy License Key';
+                }, 2000);
+            });
+        }
+
+        // Check for success callback from Stripe
+        // Your success URL should include the license key: ?success=true&key=cs_XXXXX
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            const key = urlParams.get('key');
+            if (key) {
+                document.getElementById('licenseKey').textContent = key;
+                document.getElementById('activationCommand').textContent = `sessions activate ${key}`;
+                document.getElementById('checkoutForm').classList.add('hide');
+                document.getElementById('successContainer').classList.add('show');
+            }
+        }
+
+        // Handle cancelled checkout
+        if (urlParams.get('canceled') === 'true') {
+            document.getElementById('errorMessage').textContent = 'Checkout was cancelled. You can try again when ready.';
+            document.getElementById('errorMessage').classList.add('show');
+        }
+    </script>
+</body>
+</html>
