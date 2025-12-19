@@ -1,6 +1,6 @@
-# Claude Sessions Deployment Guide
+# Claude Sessions Deployment Guide (Render)
 
-Complete step-by-step guide to deploy Claude Sessions to production.
+Complete step-by-step guide to deploy Claude Sessions to production using Render.
 
 ---
 
@@ -19,43 +19,29 @@ git push -u origin master
 
 ---
 
-## Step 2: Deploy Landing Page (Cloudflare Pages or Vercel)
+## Step 2: Deploy Landing Page to Render (Static Site)
 
-### Option A: Cloudflare Pages (Recommended - Free)
-
-1. Go to https://dash.cloudflare.com
-2. Click **Pages** in the sidebar
-3. Click **Create a project** → **Connect to Git**
-4. Select your `claudesessions` repository
-5. Configure build settings:
-   - **Project name:** `claudesessions`
-   - **Production branch:** `master`
-   - **Build command:** (leave empty)
-   - **Build output directory:** `web`
-6. Click **Save and Deploy**
-7. Once deployed, go to **Custom domains**
-8. Add `claudesessions.com`
-9. Follow DNS instructions (add CNAME record)
-
-### Option B: Vercel (Alternative)
-
-1. Go to https://vercel.com
-2. Click **Add New** → **Project**
-3. Import your GitHub repo
+1. Go to https://dashboard.render.com
+2. Click **New** → **Static Site**
+3. Connect your GitHub repo `claudesessions`
 4. Configure:
+   - **Name:** `claudesessions`
+   - **Branch:** `master`
    - **Root Directory:** `web`
-   - **Framework Preset:** Other
-5. Deploy
-6. Add custom domain `claudesessions.com`
+   - **Build Command:** (leave empty)
+   - **Publish Directory:** `.`
+5. Click **Create Static Site**
+6. Once deployed, go to **Settings** → **Custom Domains**
+7. Add `claudesessions.com`
+8. Follow DNS instructions (add CNAME to `claudesessions.onrender.com`)
+
+Your landing page will be at: `https://claudesessions.onrender.com`
 
 ---
 
 ## Step 3: Host the Install Script
 
 The install script needs to be accessible at `https://claudesessions.com/install.sh`
-
-### If using Cloudflare Pages:
-The `web/` directory already contains your files. Create the install script:
 
 ```bash
 # Copy install script to web directory
@@ -65,14 +51,14 @@ git commit -m "Add install script to web directory"
 git push
 ```
 
-### Verify it works:
+Render will auto-deploy. Verify it works:
 ```bash
-curl -fsSL https://claudesessions.com/install.sh
+curl -fsSL https://claudesessions.onrender.com/install.sh
 ```
 
 ---
 
-## Step 4: Deploy Webhook Server to Render
+## Step 4: Deploy Webhook Server to Render (Web Service)
 
 The webhook server handles Stripe payments and sends license keys.
 
@@ -221,19 +207,16 @@ curl -fsSL https://claudesessions.com/install.sh | bash
 
 ---
 
-## Step 9: DNS Configuration (Cloudflare)
+## Step 9: DNS Configuration
 
-If using Cloudflare for DNS:
+Add these DNS records at your domain registrar:
 
-1. Go to https://dash.cloudflare.com
-2. Select `claudesessions.com`
-3. Go to **DNS**
-4. Add records:
+| Type | Name | Content |
+|------|------|---------|
+| CNAME | @ | `claudesessions.onrender.com` |
+| CNAME | www | `claudesessions.onrender.com` |
 
-| Type | Name | Content | Proxy |
-|------|------|---------|-------|
-| CNAME | @ | `claudesessions.pages.dev` | Proxied |
-| CNAME | www | `claudesessions.pages.dev` | Proxied |
+**Note:** Some registrars don't allow CNAME on root (@). Use Render's instructions or consider using Cloudflare as a DNS proxy.
 
 ---
 
@@ -279,13 +262,15 @@ If using Cloudflare for DNS:
 
 | Service | Cost |
 |---------|------|
-| Cloudflare Pages | Free |
-| Render (Web Service) | Free tier |
+| Render Static Site (landing) | Free |
+| Render Web Service (webhook) | Free tier |
 | Stripe | 2.9% + $0.30 per transaction |
 | SendGrid | Free (100 emails/day) |
 | Domain (claudesessions.com) | ~$12/year |
 
 **Total monthly cost: $0** (plus Stripe fees on sales)
+
+**Note:** Render free tier web services spin down after 15 min of inactivity. First request after spin-down takes ~30 seconds. This is fine for webhooks since Stripe retries failed deliveries.
 
 ---
 
