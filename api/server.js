@@ -20,13 +20,14 @@ const PORT = process.env.PORT || 3000;
 // Initialize Stripe
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Generate a unique license key
+// Generate a cryptographically secure license key
 function generateLicenseKey() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let key = 'cs_';
-    for (let i = 0; i < 24; i++) {
-        key += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    // Use crypto.randomBytes for secure random key generation
+    const randomBytes = crypto.randomBytes(18); // 18 bytes = 24 base64 chars
+    const key = 'cs_' + randomBytes.toString('base64')
+        .replace(/\+/g, 'X')  // Replace + with X for URL safety
+        .replace(/\//g, 'Y')  // Replace / with Y for URL safety
+        .replace(/=/g, '');   // Remove padding
     return key;
 }
 

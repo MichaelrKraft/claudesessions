@@ -1,26 +1,61 @@
-# Claude Sessions
+<div align="center">
 
-> Never lose context again.
+# 🔍 Claude Sessions
 
-**Claude Sessions** automatically archives your Claude Code sessions, making them searchable and resumable with minimal token overhead.
+### **Find Any Session in Seconds**
+
+<br />
+
+**You've had dozens of Claude Code sessions.**<br />
+**Good luck finding the one you need.**
+
+<br />
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Compatible-orange.svg)](https://claude.ai/code)
+[![100% Free](https://img.shields.io/badge/Core-100%25%20Free-green.svg)](#)
+[![Local First](https://img.shields.io/badge/Privacy-Local%20First-purple.svg)](#privacy)
+
+<br />
+
+[**Install in 30 Seconds**](#quick-install) · [**Features**](#features) · [**How It Works**](#how-it-works) · [**Website**](https://claudesessions.com)
+
+</div>
 
 ---
 
-## The Problem
+## 😤 The Problem
 
-Every time you start a new Claude Code session, you lose:
-- **Decisions** you made and why
-- **Progress** on multi-day projects
-- **Context** that took hours to build
+Claude Code saves your sessions. But can you *find* them?
 
-Starting fresh means re-explaining your project, re-discovering edge cases, and re-making decisions you already made.
+| Pain Point | What Happens |
+|------------|--------------|
+| 🔍 **No Search** | Native Claude Code has no way to search session content |
+| 📁 **Directory-Scoped** | Only shows sessions from your current directory |
+| 🔢 **Cryptic IDs** | Sessions are named with random hashes, not human-readable names |
 
-## The Solution
+Every time you start fresh, you're:
+- **Re-explaining** your project architecture
+- **Re-discovering** edge cases you already handled
+- **Re-making** decisions you made last week
+
+## ✨ The Solution
 
 Claude Sessions automatically captures your sessions and extracts the **essential context** - decisions, completions, and work in progress. When you return, you get ~500 tokens of focused context instead of re-loading 50,000 tokens of transcript.
+
+### Native Claude Code vs Claude Sessions
+
+| Feature | Native Claude Code | Claude Sessions |
+|---------|:------------------:|:---------------:|
+| Resume recent session | ✅ | ✅ |
+| **Full-text search** | ❌ | ✅ FTS5 |
+| **Web dashboard** | ❌ | ✅ |
+| **Cross-directory access** | ❌ | ✅ |
+| **Named archives** | ❌ Cryptic IDs | ✅ Human-readable |
+| **Export to Markdown** | ❌ | ✅ |
+| **Stats & analytics** | ❌ | ✅ |
+
+**Everything we add is 100% free.**
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -40,20 +75,25 @@ Claude Sessions automatically captures your sessions and extracts the **essentia
 └─────────────────────────────────────────────────────────┘
 ```
 
-## Quick Install
+## 🚀 Quick Install
 
 ```bash
 curl -fsSL https://claudesessions.com/install.sh | bash
 ```
 
-Or manually:
+**That's it.** Sessions auto-archive when you exit Claude Code. Start searching immediately.
+
+<details>
+<summary>Manual installation</summary>
 
 ```bash
-git clone https://github.com/michaelcraft/claudesessions.git ~/.claudesessions
+git clone https://github.com/MichaelrKraft/claudesessions.git ~/.claudesessions
 ~/.claudesessions/install.sh
 ```
 
-## Features
+</details>
+
+## ⚡ Features
 
 ### Auto-Archive on Exit
 Every session is automatically saved when you exit Claude Code. No manual action required.
@@ -108,7 +148,7 @@ sessions web
 # Opens http://localhost:3456
 ```
 
-## How It Works
+## 🔧 How It Works
 
 ### Architecture
 
@@ -140,7 +180,7 @@ sessions web
 - **In Progress**: "next:", "todo:", "still need to..."
 - **Outcomes**: "result:", "conclusion:", "in summary..."
 
-## Commands
+## 📋 Commands
 
 ### CLI
 
@@ -168,7 +208,7 @@ sessions web
 /archives             # Browse archived sessions
 ```
 
-## Configuration
+## ⚙️ Configuration
 
 Settings are in `~/.claude/settings.json`:
 
@@ -183,20 +223,20 @@ Settings are in `~/.claude/settings.json`:
 }
 ```
 
-## Requirements
+## 📦 Requirements
 
 - Claude Code CLI
 - Node.js 18+
 - SQLite 3.x
 - jq
 
-## Privacy
+## 🔒 Privacy
 
 **Free Tier:** All data stays on your machine. No cloud, no telemetry, no external connections. Your sessions are stored in `~/.claude/session-archives/`.
 
 **Pro Tier (Coming Soon):** Optional encrypted cloud backup with end-to-end encryption. You control your data. Export anytime.
 
-## Roadmap
+## 🗺️ Roadmap
 
 ### Coming in Pro (Q1 2025)
 - [ ] **Cloud Backup**: Encrypted cloud storage for your sessions
@@ -209,14 +249,24 @@ Settings are in `~/.claude/settings.json`:
 - [ ] **Advanced Analytics**: Team knowledge insights
 - [ ] **API Access**: Programmatic archive management
 
-## Contributing
+## 🤝 Contributing
 
 Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## License
+## 📄 License
 
 MIT - see [LICENSE](LICENSE).
 
 ---
 
-**[claudesessions.com](https://claudesessions.com)** - Never lose context again.
+<div align="center">
+
+**[claudesessions.com](https://claudesessions.com)**
+
+*Find any session in seconds. Never lose context again.*
+
+<br />
+
+**⭐ Star this repo if Claude Sessions helps you!**
+
+</div>

@@ -7,6 +7,13 @@ set -e
 ARCHIVE_DIR="$HOME/.claude/session-archives"
 DB_FILE="$ARCHIVE_DIR/sessions.db"
 
+# Escape string for safe SQL insertion (prevent SQL injection)
+escape_sql() {
+    local input="$1"
+    # Double single quotes and remove any null bytes
+    printf '%s' "$input" | sed "s/'/''/g" | tr -d '\0'
+}
+
 # Initialize database with FTS5 table
 init_db() {
     sqlite3 "$DB_FILE" <<EOF
@@ -16,6 +23,8 @@ CREATE TABLE IF NOT EXISTS sessions (
     session_id TEXT,
     archived_at TEXT,
     working_directory TEXT,
+    project_root TEXT,
+    project_name TEXT,
     exit_reason TEXT,
     user_messages INTEGER DEFAULT 0,
     assistant_messages INTEGER DEFAULT 0,
@@ -69,12 +78,33 @@ index_session() {
     local session_id=$(jq -r '.session_id // ""' "$metadata")
     local archived_at=$(jq -r '.archived_at // ""' "$metadata")
     local working_dir=$(jq -r '.working_directory // ""' "$metadata")
+    local project_root=$(jq -r '.project_root // ""' "$metadata")
+    local project_name=$(jq -r '.project_name // ""' "$metadata")
     local exit_reason=$(jq -r '.exit_reason // ""' "$metadata")
     local user_msgs=$(jq -r '.stats.user_messages // 0' "$metadata")
     local asst_msgs=$(jq -r '.stats.assistant_messages // 0' "$metadata")
     local tools=$(jq -r '.stats.tool_calls // 0' "$metadata")
     local tools_used=$(jq -r '.tools_used // ""' "$metadata")
     local preview=$(jq -r '.preview // ""' "$metadata" | sed "s/'/''/g")
+
+    # If project_root not in metadata, try to detect from working_directory
+    if [ -z "$project_root" ] && [ -n "$working_dir" ]; then
+        # Detect project root retroactively
+        local dir="$working_dir"
+        while [ "$dir" != "/" ] && [ -n "$dir" ]; do
+            if [ -d "$dir/.git" ] || [ -f "$dir/package.json" ] || [ -f "$dir/Cargo.toml" ] || [ -f "$dir/pyproject.toml" ] || [ -f "$dir/go.mod" ]; then
+                project_root="$dir"
+                project_name=$(basename "$dir")
+                break
+            fi
+            dir=$(dirname "$dir")
+        done
+        # Fallback to working_dir
+        if [ -z "$project_root" ]; then
+            project_root="$working_dir"
+            project_name=$(basename "$working_dir")
+        fi
+    fi
     
     # Get summary if exists
     local summary=""
@@ -99,11 +129,11 @@ index_session() {
     # Insert into main table (upsert)
     sqlite3 "$DB_FILE" <<EOF
 INSERT OR REPLACE INTO sessions (
-    archive_name, session_id, archived_at, working_directory, exit_reason,
-    user_messages, assistant_messages, tool_calls, tools_used, preview, summary
+    archive_name, session_id, archived_at, working_directory, project_root, project_name,
+    exit_reason, user_messages, assistant_messages, tool_calls, tools_used, preview, summary
 ) VALUES (
-    '$archive_name', '$session_id', '$archived_at', '$working_dir', '$exit_reason',
-    $user_msgs, $asst_msgs, $tools, '$tools_used', '$preview', '$summary'
+    '$archive_name', '$session_id', '$archived_at', '$working_dir', '$project_root', '$project_name',
+    '$exit_reason', $user_msgs, $asst_msgs, $tools, '$tools_used', '$preview', '$summary'
 );
 EOF
     
@@ -122,9 +152,14 @@ EOF
 # Reindex all sessions
 reindex_all() {
     echo "Reindexing all sessions..."
-    
-    # Clear existing data
-    sqlite3 "$DB_FILE" "DELETE FROM sessions_fts; DELETE FROM sessions;"
+
+    # Migration: Add project columns if they don't exist (for existing users)
+    sqlite3 "$DB_FILE" "ALTER TABLE sessions ADD COLUMN project_root TEXT;" 2>/dev/null || true
+    sqlite3 "$DB_FILE" "ALTER TABLE sessions ADD COLUMN project_name TEXT;" 2>/dev/null || true
+
+    # Clear existing data (drop and recreate FTS5 table since contentless tables don't support DELETE)
+    sqlite3 "$DB_FILE" "DROP TABLE IF EXISTS sessions_fts; DELETE FROM sessions;"
+    sqlite3 "$DB_FILE" "CREATE VIRTUAL TABLE IF NOT EXISTS sessions_fts USING fts5(archive_name, preview, summary, transcript_text, content='');"
     
     # Index each archive
     for archive in "$ARCHIVE_DIR"/*/; do
@@ -139,21 +174,24 @@ reindex_all() {
 # Search sessions using FTS
 search() {
     local query="$1"
-    
+
     if [ -z "$query" ]; then
         echo "Usage: db-manager.sh search <query>"
         return 1
     fi
-    
+
+    # Escape query for SQL safety
+    local escaped_query=$(escape_sql "$query")
+
     sqlite3 -header -column "$DB_FILE" <<EOF
-SELECT 
+SELECT
     s.archive_name,
     s.archived_at,
     s.user_messages || ' msgs' as messages,
     substr(s.preview, 1, 60) || '...' as preview
 FROM sessions s
 JOIN sessions_fts fts ON s.id = fts.rowid
-WHERE sessions_fts MATCH '$query'
+WHERE sessions_fts MATCH '$escaped_query'
 ORDER BY s.archived_at DESC
 LIMIT 20;
 EOF
@@ -162,25 +200,33 @@ EOF
 # Get session details
 get_session() {
     local archive_name="$1"
-    
+
+    # Escape for SQL safety
+    local escaped_name=$(escape_sql "$archive_name")
+
     sqlite3 -header -column "$DB_FILE" <<EOF
-SELECT * FROM sessions WHERE archive_name LIKE '%$archive_name%' LIMIT 1;
+SELECT * FROM sessions WHERE archive_name LIKE '%$escaped_name%' LIMIT 1;
 EOF
 }
 
 # List recent sessions
 list_recent() {
     local limit="${1:-10}"
-    
+
+    # Ensure limit is a number (prevent SQL injection)
+    if ! [[ "$limit" =~ ^[0-9]+$ ]]; then
+        limit=10
+    fi
+
     sqlite3 -header -column "$DB_FILE" <<EOF
-SELECT 
+SELECT
     archive_name,
     archived_at,
     user_messages || '/' || assistant_messages as 'usr/asst',
     tool_calls as tools,
     substr(preview, 1, 50) || '...' as preview
-FROM sessions 
-ORDER BY archived_at DESC 
+FROM sessions
+ORDER BY archived_at DESC
 LIMIT $limit;
 EOF
 }

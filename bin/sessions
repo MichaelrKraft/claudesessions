@@ -37,6 +37,13 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
+# Escape string for safe SQL insertion (prevent SQL injection)
+escape_sql() {
+    local input="$1"
+    # Double single quotes and remove any null bytes
+    printf '%s' "$input" | sed "s/'/''/g" | tr -d '\0'
+}
+
 # Ensure database exists
 ensure_db() {
     if [ ! -f "$DB_FILE" ]; then
@@ -104,29 +111,32 @@ cmd_search() {
         echo "Example: sessions search 'React component'"
         return 1
     fi
-    
+
     ensure_db
-    
+
     echo -e "${BLUE}${BOLD}=== Searching: $query ===${NC}"
     echo ""
-    
+
+    # Escape query for SQL safety
+    local escaped_query=$(escape_sql "$query")
+
     if [ -f "$DB_FILE" ]; then
-        # Use FTS search
+        # Use FTS search with escaped query
         results=$(sqlite3 -separator '|' "$DB_FILE" "
             SELECT s.archive_name, s.archived_at, s.user_messages, substr(s.preview, 1, 80)
             FROM sessions s
             JOIN sessions_fts fts ON s.id = fts.rowid
-            WHERE sessions_fts MATCH '\"$query\"' OR sessions_fts MATCH '$query*'
+            WHERE sessions_fts MATCH '\"$escaped_query\"' OR sessions_fts MATCH '$escaped_query*'
             ORDER BY s.archived_at DESC
             LIMIT 15;
         " 2>/dev/null)
-        
+
         if [ -z "$results" ]; then
-            # Fallback to LIKE search
+            # Fallback to LIKE search with escaped query
             results=$(sqlite3 -separator '|' "$DB_FILE" "
                 SELECT archive_name, archived_at, user_messages, substr(preview, 1, 80)
                 FROM sessions
-                WHERE preview LIKE '%$query%' OR summary LIKE '%$query%'
+                WHERE preview LIKE '%$escaped_query%' OR summary LIKE '%$escaped_query%'
                 ORDER BY archived_at DESC
                 LIMIT 15;
             ")
@@ -205,7 +215,15 @@ cmd_view() {
     # Show metadata
     if [ -f "$session_dir/metadata.json" ]; then
         echo -e "${CYAN}${BOLD}Details:${NC}"
-        jq -r '"  Archived: \(.archived_at)\n  Directory: \(.working_directory)\n  Messages: \(.stats.user_messages) user, \(.stats.assistant_messages) assistant\n  Tool calls: \(.stats.tool_calls)\n  Tools: \(.tools_used // \"none\")"' "$session_dir/metadata.json"
+        jq -r '
+            "  Archived: " + .archived_at +
+            "\n  Project: " + (.project_name // "Unknown") +
+            "\n  Project Root: " + (.project_root // .working_directory // "Unknown") +
+            "\n  Directory: " + (.working_directory // "Unknown") +
+            "\n  Messages: " + (.stats.user_messages | tostring) + " user, " + (.stats.assistant_messages | tostring) + " assistant" +
+            "\n  Tool calls: " + (.stats.tool_calls | tostring) +
+            "\n  Tools: " + (.tools_used // "none")
+        ' "$session_dir/metadata.json"
         echo ""
     fi
     
@@ -247,6 +265,82 @@ cmd_stats() {
         echo "Total sessions: $total_sessions"
         echo "Archive size: $total_size"
         echo "Location: $ARCHIVE_DIR"
+    fi
+}
+
+cmd_project() {
+    project="$1"
+    ensure_db
+
+    if [ -z "$project" ]; then
+        # List all projects with session counts
+        echo -e "${BLUE}${BOLD}=== Projects ===${NC}"
+        echo ""
+
+        if [ ! -f "$DB_FILE" ]; then
+            echo "No database found. Run 'sessions reindex' first."
+            return 1
+        fi
+
+        # Get unique projects with session count
+        results=$(sqlite3 -separator '|' "$DB_FILE" "
+            SELECT
+                COALESCE(NULLIF(project_name, ''), 'Unknown') as proj,
+                COUNT(*) as session_count,
+                MAX(archived_at) as last_session
+            FROM sessions
+            GROUP BY COALESCE(NULLIF(project_name, ''), 'Unknown')
+            ORDER BY last_session DESC;
+        " 2>/dev/null)
+
+        if [ -z "$results" ]; then
+            echo "No projects found. Archive some sessions first."
+            return
+        fi
+
+        echo "$results" | while IFS='|' read -r proj count last; do
+            formatted_date=$(echo "$last" | cut -d'T' -f1)
+            echo -e "${GREEN}${BOLD}$proj${NC}"
+            echo -e "  ${CYAN}Sessions:${NC} $count | ${CYAN}Last active:${NC} $formatted_date"
+            echo ""
+        done
+
+        total=$(echo "$results" | wc -l | tr -d ' ')
+        echo -e "${BLUE}Total: $total project(s)${NC}"
+    else
+        # List sessions for specific project
+        echo -e "${BLUE}${BOLD}=== Sessions in: $project ===${NC}"
+        echo ""
+
+        # Escape project name for SQL safety
+        local escaped_project=$(escape_sql "$project")
+
+        results=$(sqlite3 -separator '|' "$DB_FILE" "
+            SELECT archive_name, archived_at, user_messages, tool_calls, substr(preview, 1, 60)
+            FROM sessions
+            WHERE project_name LIKE '%$escaped_project%'
+               OR project_root LIKE '%$escaped_project%'
+               OR working_directory LIKE '%$escaped_project%'
+            ORDER BY archived_at DESC
+            LIMIT 20;
+        " 2>/dev/null)
+
+        if [ -z "$results" ]; then
+            echo "No sessions found for project '$project'"
+            echo "Use 'sessions project' to see all projects."
+            return
+        fi
+
+        echo "$results" | while IFS='|' read -r name date msgs tools preview; do
+            echo -e "${GREEN}${BOLD}$name${NC}"
+            echo -e "  ${CYAN}Date:${NC} $date"
+            echo -e "  ${CYAN}Messages:${NC} $msgs user | ${CYAN}Tools:${NC} $tools calls"
+            echo -e "  ${CYAN}Preview:${NC} ${preview}..."
+            echo ""
+        done
+
+        total=$(echo "$results" | wc -l | tr -d ' ')
+        echo -e "${BLUE}Found $total session(s) for '$project'${NC}"
     fi
 }
 
@@ -433,6 +527,8 @@ cmd_help() {
     echo "  list              List all archived sessions"
     echo "  search <query>    Full-text search across sessions"
     echo "  view <session>    View session details and summary"
+    echo "  project           List all projects with session counts"
+    echo "  project <name>    List sessions for a specific project"
     echo "  stats             Show archive statistics"
     echo "  export <session>  Export session (formats: md, json, txt)"
     echo "  reindex           Rebuild search index"
@@ -457,6 +553,7 @@ case "${1:-list}" in
     list)       cmd_list ;;
     search)     cmd_search "$2" ;;
     view)       cmd_view "$2" ;;
+    project)    cmd_project "$2" ;;
     stats)      cmd_stats ;;
     export)     cmd_export "$2" "$3" ;;
     reindex)    cmd_reindex ;;

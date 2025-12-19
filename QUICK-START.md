@@ -1,15 +1,15 @@
 # Quick Start Guide
 
-Get backwards.dev running in under 2 minutes.
+Get Claude Sessions running in under 2 minutes.
 
 ## 1. Install
 
 ```bash
-curl -fsSL https://backwards.dev/install.sh | bash
+curl -fsSL https://claudesessions.com/install.sh | bash
 ```
 
 **What this does:**
-- Copies files to `~/.backwards-dev/`
+- Copies files to `~/.claudesessions/`
 - Initializes the SQLite database
 - Adds the SessionEnd hook to Claude Code
 - Adds `sessions` command to your PATH
@@ -73,7 +73,7 @@ Claude will automatically load the key context from that session.
 
 Add to your shell config:
 ```bash
-export PATH="$HOME/.backwards-dev:$PATH"
+export PATH="$HOME/.claudesessions/bin:$PATH"
 ```
 
 ### Sessions not auto-archiving
@@ -87,10 +87,10 @@ cat ~/.claude/settings.json | grep -A5 "SessionEnd"
 
 Reinitialize:
 ```bash
-~/.backwards-dev/db-manager.sh init
-~/.backwards-dev/db-manager.sh reindex
+~/.claudesessions/bin/db-manager.sh init
+~/.claudesessions/bin/db-manager.sh reindex
 ```
 
 ---
 
-Need more help? See the full [README](README.md) or [open an issue](https://github.com/yourusername/backwards-dev/issues).
+Need more help? See the full [README](README.md) or [open an issue](https://github.com/michaelkraft/claudesessions/issues).

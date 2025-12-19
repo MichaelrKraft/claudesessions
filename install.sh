@@ -180,7 +180,7 @@ install_claude_skill() {
 }
 
 configure_session_hook() {
-    print_step "Configuring auto-archive hook..."
+    print_step "Configuring session hooks..."
 
     SETTINGS_FILE="$CLAUDE_DIR/settings.json"
 
@@ -189,19 +189,24 @@ configure_session_hook() {
         echo '{}' > "$SETTINGS_FILE"
     fi
 
-    # Check if hook already exists
-    if grep -q "archive-session.sh" "$SETTINGS_FILE" 2>/dev/null; then
-        print_success "Session hook already configured"
+    # Check if hooks already exist
+    if grep -q "archive-session.sh" "$SETTINGS_FILE" 2>/dev/null && grep -q "inject-context.sh" "$SETTINGS_FILE" 2>/dev/null; then
+        print_success "Session hooks already configured"
         return
     fi
 
     # Backup existing settings
     cp "$SETTINGS_FILE" "$SETTINGS_FILE.backup" 2>/dev/null || true
 
-    # Add the hook using jq
+    # Add the hooks using jq (both SessionStart for context injection and SessionEnd for archiving)
     if command -v jq &> /dev/null; then
         local hook_config='{
             "hooks": {
+                "SessionStart": [{
+                    "type": "command",
+                    "command": "'"$INSTALL_DIR"'/bin/inject-context.sh",
+                    "timeout": 5
+                }],
                 "SessionEnd": [{
                     "type": "command",
                     "command": "'"$INSTALL_DIR"'/bin/archive-session.sh",
@@ -214,11 +219,14 @@ configure_session_hook() {
         jq -s '.[0] * .[1]' "$SETTINGS_FILE" <(echo "$hook_config") > "$SETTINGS_FILE.tmp" && \
             mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
 
-        print_success "Auto-archive hook configured"
+        print_success "Session hooks configured (auto-archive + context injection)"
     else
-        print_warning "Could not auto-configure hook (jq not available)"
+        print_warning "Could not auto-configure hooks (jq not available)"
         echo "Please add this to $SETTINGS_FILE manually:"
-        echo '  "hooks": { "SessionEnd": [{ "type": "command", "command": "~/.claudesessions/bin/archive-session.sh" }] }'
+        echo '  "hooks": {'
+        echo '    "SessionStart": [{ "type": "command", "command": "~/.claudesessions/bin/inject-context.sh", "timeout": 5 }],'
+        echo '    "SessionEnd": [{ "type": "command", "command": "~/.claudesessions/bin/archive-session.sh", "timeout": 30 }]'
+        echo '  }'
     fi
 }
 
@@ -270,6 +278,11 @@ verify_installation() {
 
     if [ ! -f "$INSTALL_DIR/bin/archive-session.sh" ]; then
         print_error "archive-session.sh not found"
+        errors=$((errors + 1))
+    fi
+
+    if [ ! -f "$INSTALL_DIR/bin/inject-context.sh" ]; then
+        print_error "inject-context.sh not found"
         errors=$((errors + 1))
     fi
 

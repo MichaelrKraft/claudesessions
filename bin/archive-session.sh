@@ -65,6 +65,40 @@ Summary:"
 # === MAIN ===
 mkdir -p "$ARCHIVE_DIR"
 
+# Detect project root by looking for common project markers
+detect_project_root() {
+    local dir="$1"
+    while [ "$dir" != "/" ] && [ -n "$dir" ]; do
+        if [ -d "$dir/.git" ]; then
+            echo "$dir"
+            return 0
+        elif [ -f "$dir/package.json" ]; then
+            echo "$dir"
+            return 0
+        elif [ -f "$dir/Cargo.toml" ]; then
+            echo "$dir"
+            return 0
+        elif [ -f "$dir/pyproject.toml" ]; then
+            echo "$dir"
+            return 0
+        elif [ -f "$dir/go.mod" ]; then
+            echo "$dir"
+            return 0
+        elif [ -f "$dir/Gemfile" ]; then
+            echo "$dir"
+            return 0
+        elif [ -f "$dir/pom.xml" ]; then
+            echo "$dir"
+            return 0
+        elif [ -f "$dir/build.gradle" ]; then
+            echo "$dir"
+            return 0
+        fi
+        dir=$(dirname "$dir")
+    done
+    echo "$1"  # Fallback to cwd
+}
+
 # Read hook input from stdin
 input=$(cat)
 
@@ -74,7 +108,16 @@ transcript_path=$(echo "$input" | jq -r '.transcript_path // ""')
 reason=$(echo "$input" | jq -r '.reason // "unknown"')
 cwd=$(echo "$input" | jq -r '.cwd // ""')
 
+# Detect project for this session
+if [ -n "$cwd" ] && [ "$cwd" != "null" ]; then
+    project_root=$(detect_project_root "$cwd")
+else
+    project_root=""
+fi
+project_name=$(basename "$project_root" 2>/dev/null || echo "")
+
 log "Session ended: $session_id (reason: $reason)"
+log "Project: $project_name ($project_root)"
 
 # Validate transcript exists
 if [ -z "$transcript_path" ] || [ ! -f "$transcript_path" ]; then
@@ -114,6 +157,8 @@ cat > "$session_archive/metadata.json" <<EOF
   "archived_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "exit_reason": "$reason",
   "working_directory": "$cwd",
+  "project_root": "$project_root",
+  "project_name": "$project_name",
   "archive_name": "$archive_name",
   "stats": {
     "user_messages": $user_messages,
@@ -138,9 +183,11 @@ fi
 cat > "$session_archive/README.md" <<EOF
 # Session Archive: $archive_name
 
-**Session ID:** \`$session_id\`  
-**Archived:** $(date -u +%Y-%m-%dT%H:%M:%SZ)  
-**Exit Reason:** $reason  
+**Session ID:** \`$session_id\`
+**Archived:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
+**Exit Reason:** $reason
+**Project:** $project_name
+**Project Root:** \`$project_root\`
 **Working Directory:** \`$cwd\`  
 
 ## AI Summary
