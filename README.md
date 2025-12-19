@@ -15,6 +15,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Compatible-orange.svg)](https://claude.ai/code)
 [![100% Free](https://img.shields.io/badge/Core-100%25%20Free-green.svg)](#)
 [![Local First](https://img.shields.io/badge/Privacy-Local%20First-purple.svg)](#privacy)
+[![Coder1 Ecosystem](https://img.shields.io/badge/Coder1-Ecosystem-ff6b35.svg)](https://coder1.ai)
 
 <br />
 
@@ -256,6 +257,10 @@ Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## 📄 License
 
 MIT - see [LICENSE](LICENSE).
+
+## 🛠️ About
+
+Built by the creator of [**Coder1 IDE**](https://coder1.ai) - an AI-native development environment that transforms how developers build software.
 
 ---
 

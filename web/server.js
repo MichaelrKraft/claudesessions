@@ -289,6 +289,9 @@ const HTML_TEMPLATE = `<!DOCTYPE html>
                 <button onclick="loadSessions()" style="background: rgba(255,255,255,0.1);">All Sessions</button>
             </div>
             <div class="stats" id="stats"></div>
+            <div style="margin-top: 12px; font-size: 12px; color: #666;">
+                Built by the creator of <a href="https://coder1.ai" style="color: #d97706; text-decoration: none;">Coder1 IDE</a>
+            </div>
         </header>
         
         <div class="sessions" id="sessions"></div>

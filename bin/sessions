@@ -546,6 +546,8 @@ cmd_help() {
     echo "  sessions activate cs_Xk9mP2nQ4rT6vW8y"
     echo ""
     echo -e "${CYAN}Get credits:${NC} https://claudesessions.com/buy"
+    echo ""
+    echo -e "Powered by ${YELLOW}Coder1${NC} - https://coder1.ai"
 }
 
 # === MAIN ===
