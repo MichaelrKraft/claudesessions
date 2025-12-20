@@ -682,7 +682,7 @@
         <div class="install-box reveal-up">
             <span class="install-label">Install in 30 seconds</span>
             <div class="install-command">
-                <code>curl -fsSL https://claudesessions.com/install.sh | bash</code>
+                <code>curl -fsSL https://claudesessions.onrender.com/install.sh | bash</code>
                 <button class="copy-btn" onclick="copyCommand()">Copy</button>
             </div>
         </div>
@@ -919,7 +919,7 @@
 
     <script>
         function copyCommand() {
-            const command = 'curl -fsSL https://claudesessions.com/install.sh | bash';
+            const command = 'curl -fsSL https://claudesessions.onrender.com/install.sh | bash';
             navigator.clipboard.writeText(command).then(() => {
                 const btn = document.querySelector('.copy-btn');
                 btn.textContent = 'Copied!';

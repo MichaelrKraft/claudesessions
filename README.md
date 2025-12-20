@@ -79,7 +79,7 @@ Claude Sessions automatically captures your sessions and extracts the **essentia
 ## 🚀 Quick Install
 
 ```bash
-curl -fsSL https://claudesessions.com/install.sh | bash
+curl -fsSL https://claudesessions.onrender.com/install.sh | bash
 ```
 
 **That's it.** Sessions auto-archive when you exit Claude Code. Start searching immediately.
