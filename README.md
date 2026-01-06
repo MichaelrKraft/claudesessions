@@ -218,7 +218,7 @@ Settings are in `~/.claude/settings.json`:
   "hooks": {
     "SessionEnd": [{
       "type": "command",
-      "command": "~/.claudesessions/archive-session.sh"
+      "command": "~/.claudesessions/bin/archive-session.sh"
     }]
   }
 }
