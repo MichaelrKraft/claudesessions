@@ -258,9 +258,11 @@ Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 MIT - see [LICENSE](LICENSE).
 
-## 🛠️ About
+## 🛠️ Part of the Coder1 Ecosystem
 
-Built by the creator of [**Coder1 IDE**](https://coder1.ai) - an AI-native development environment that transforms how developers build software.
+Claude Sessions was built while developing [**Coder1 IDE**](https://coder1.ai?utm_source=github&utm_medium=claudesessions) - an AI-native development environment currently in private alpha.
+
+Interested in where AI-assisted coding is heading? [Request early access →](https://coder1.ai?utm_source=github&utm_medium=claudesessions)
 
 ---
 

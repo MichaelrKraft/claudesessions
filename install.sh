@@ -9,7 +9,7 @@
 #   curl -fsSL https://claudesessions.com/install.sh | bash
 #
 # Or:
-#   git clone https://github.com/michaelcraft/claudesessions.git ~/.claudesessions
+#   git clone https://github.com/MichaelrKraft/claudesessions.git ~/.claudesessions
 #   ~/.claudesessions/install.sh
 #
 
@@ -116,11 +116,11 @@ install_files() {
         if command -v git &> /dev/null; then
             print_step "Cloning repository..."
             rm -rf "$INSTALL_DIR" 2>/dev/null || true
-            git clone --quiet https://github.com/michaelcraft/claudesessions.git "$INSTALL_DIR"
+            git clone --quiet https://github.com/MichaelrKraft/claudesessions.git "$INSTALL_DIR"
         else
             print_error "Git is required for installation"
             echo "Please install git and try again, or clone manually:"
-            echo "  git clone https://github.com/michaelcraft/claudesessions.git ~/.claudesessions"
+            echo "  git clone https://github.com/MichaelrKraft/claudesessions.git ~/.claudesessions"
             exit 1
         fi
     fi
@@ -323,7 +323,7 @@ print_complete() {
     echo "  4. Sessions are auto-archived when you exit Claude Code"
     echo ""
     echo -e "Documentation: ${BLUE}https://claudesessions.com${NC}"
-    echo -e "Issues: ${BLUE}https://github.com/michaelcraft/claudesessions/issues${NC}"
+    echo -e "Issues: ${BLUE}https://github.com/MichaelrKraft/claudesessions/issues${NC}"
     echo ""
 }
 
