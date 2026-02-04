@@ -27,15 +27,15 @@
 
 ## 😤 The Problem
 
-Claude Code saves your sessions. But can you *find* them?
+Claude Code now has basic session resume (`--continue`, `--resume`). **But can you actually *find* what you're looking for?**
 
-| Pain Point | What Happens |
-|------------|--------------|
-| 🔍 **No Search** | Native Claude Code has no way to search session content |
-| 📁 **Directory-Scoped** | Only shows sessions from your current directory |
-| 🔢 **Cryptic IDs** | Sessions are named with random hashes, not human-readable names |
+| Native Claude Code | The Gap |
+|-------------------|---------|
+| ✅ Resume by session name | ❌ Can't search session *content* |
+| ✅ Picker shows recent sessions | ❌ Limited to current git repo |
+| ✅ Name sessions with `/rename` | ❌ No checkpoints within sessions |
 
-Every time you start fresh, you're:
+Every time you start fresh, you're still:
 - **Re-explaining** your project architecture
 - **Re-discovering** edge cases you already handled
 - **Re-making** decisions you made last week
@@ -52,7 +52,7 @@ Claude Sessions automatically captures your sessions and extracts the **essentia
 | **Full-text search** | ❌ | ✅ FTS5 |
 | **Web dashboard** | ❌ | ✅ |
 | **Cross-directory access** | ❌ | ✅ |
-| **Named archives** | ❌ Cryptic IDs | ✅ Human-readable |
+| **Session naming** | ✅ `/rename` | ✅ Auto + manual tags |
 | **Export to Markdown** | ❌ | ✅ |
 | **Stats & analytics** | ❌ | ✅ |
 
@@ -257,6 +257,22 @@ Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## 📄 License
 
 MIT - see [LICENSE](LICENSE).
+
+## 🆚 When to Use What
+
+**Use Claude Code's built-in `--resume` when:**
+- You need your most recent session
+- You're working in a single project
+- You remember the session name
+
+**Use Claude Sessions when:**
+- You need to **search** what you discussed, not just session names
+- You work across **multiple projects** and want unified access
+- You want a **visual dashboard** to browse sessions
+- You need **checkpoints** to mark milestones
+- You want **analytics** on your Claude Code usage
+
+---
 
 ## 🛠️ Part of the Coder1 Ecosystem
 
