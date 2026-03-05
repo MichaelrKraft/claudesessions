@@ -15,7 +15,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Compatible-orange.svg)](https://claude.ai/code)
 [![100% Free](https://img.shields.io/badge/Core-100%25%20Free-green.svg)](#)
 [![Local First](https://img.shields.io/badge/Privacy-Local%20First-purple.svg)](#privacy)
-[![Coder1 Ecosystem](https://img.shields.io/badge/Coder1-Ecosystem-ff6b35.svg)](https://coder1.ai)
+[![Coder1 Ecosystem](https://img.shields.io/badge/Coder1-Ecosystem-ff6b35.svg)](https://coder1.ai?utm_source=github&utm_medium=claudesessions&utm_content=badge)
 
 <br />
 
@@ -56,7 +56,7 @@ Claude Sessions automatically captures your sessions and extracts the **essentia
 | **Export to Markdown** | ❌ | ✅ |
 | **Stats & analytics** | ❌ | ✅ |
 
-**Everything we add is 100% free.**
+**Everything we add is 100% free.** (We're building [Coder1 IDE](https://coder1.ai?utm_source=github&utm_medium=claudesessions&utm_content=free_note) — this is a standalone piece we extracted and open-sourced.)
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -83,6 +83,8 @@ curl -fsSL https://claudesessions.onrender.com/install.sh | bash
 ```
 
 **That's it.** Sessions auto-archive when you exit Claude Code. Start searching immediately.
+
+> 💡 **Built by [Coder1](https://coder1.ai?utm_source=github&utm_medium=claudesessions&utm_content=install_section)** — we're building an IDE specifically for Claude Code users. Claude Sessions was born from our own frustration losing context. [See what we're building →](https://coder1.ai?utm_source=github&utm_medium=claudesessions&utm_content=install_section)
 
 <details>
 <summary>Manual installation</summary>
@@ -274,11 +276,26 @@ MIT - see [LICENSE](LICENSE).
 
 ---
 
-## 🛠️ Part of the Coder1 Ecosystem
+## 🚀 Want More Than Session Search?
 
-Claude Sessions was built while developing [**Coder1 IDE**](https://coder1.ai?utm_source=github&utm_medium=claudesessions) - an AI-native development environment currently in private alpha.
+Claude Sessions solves **one problem**: finding your past work.
 
-Interested in where AI-assisted coding is heading? [Request early access →](https://coder1.ai?utm_source=github&utm_medium=claudesessions)
+**[Coder1 IDE](https://coder1.ai?utm_source=github&utm_medium=claudesessions&utm_content=comparison)** solves the **whole workflow**:
+
+| Feature | Claude Sessions | Coder1 IDE |
+|---------|:---------------:|:----------:|
+| Session search & checkpoints | ✅ | ✅ Built-in |
+| **Visual IDE for Claude Code** | — | ✅ |
+| **Real-time team collaboration** | — | ✅ |
+| **One-click deployments** | — | ✅ |
+| **Persistent AI memory across projects** | — | ✅ |
+| **Live preview while coding** | — | ✅ |
+
+If you love Claude Sessions, you'll love having it **integrated into a full IDE**.
+
+**[See Coder1 screenshots →](docs/coder1-preview.html)** | **[Join the Alpha →](https://coder1.ai?utm_source=github&utm_medium=claudesessions&utm_content=bottom_cta)**
+
+*Currently invite-only. Free for early adopters.*
 
 ---
 

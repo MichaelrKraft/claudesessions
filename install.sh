@@ -52,6 +52,51 @@ print_error() {
     echo -e "${RED}✗${NC} $1"
 }
 
+ask_star_repo() {
+    # Check if already asked
+    local prefs_file="$HOME/.claudesessions/prefs.json"
+    if [ -f "$prefs_file" ] && grep -q '"star_asked": true' "$prefs_file" 2>/dev/null; then
+        return 0  # Already asked, skip silently
+    fi
+
+    echo ""
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "  ${GREEN}Community${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo "Claude Sessions is free and open-source."
+    echo "A GitHub star helps other Claude Code users discover it."
+    echo ""
+    echo "  [1] Star on GitHub  (takes 1 second)"
+    echo "  [2] Skip for now"
+    echo ""
+    read -p "Your choice [1/2]: " choice
+
+    # Ensure prefs directory exists
+    mkdir -p "$(dirname "$prefs_file")"
+
+    case "$choice" in
+        1)
+            if command -v gh &> /dev/null; then
+                if gh api -X PUT /user/starred/MichaelrKraft/claudesessions 2>/dev/null; then
+                    print_success "Thanks for the star!"
+                else
+                    print_warning "Couldn't star automatically. Visit: https://github.com/MichaelrKraft/claudesessions"
+                fi
+            else
+                echo "Visit: https://github.com/MichaelrKraft/claudesessions"
+            fi
+            ;;
+        *)
+            echo "No problem, continuing with setup..."
+            ;;
+    esac
+
+    # Save preference so we don't ask again
+    echo '{"star_asked": true}' > "$prefs_file"
+    echo ""
+}
+
 check_dependencies() {
     print_step "Checking dependencies..."
 
@@ -322,14 +367,40 @@ print_complete() {
     echo ""
     echo "  4. Sessions are auto-archived when you exit Claude Code"
     echo ""
-    echo -e "Documentation: ${BLUE}https://claudesessions.com${NC}"
+    echo -e "Documentation: ${BLUE}https://claudesession.com${NC}"
     echo -e "Issues: ${BLUE}https://github.com/MichaelrKraft/claudesessions/issues${NC}"
+    echo ""
+}
+
+ask_coder1_email() {
+    echo ""
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "  ${YELLOW}Coder1 IDE${NC} - Early Access"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo "Claude Sessions is part of the Coder1 ecosystem."
+    echo "Get early access to Coder1 IDE - the first IDE built for Claude Code."
+    echo ""
+    read -p "Enter your email (or press Enter to skip): " user_email
+
+    if [ -n "$user_email" ]; then
+        # Send to Buttondown
+        curl -s -X POST "https://buttondown.email/api/emails/embed-subscribe/Coder1" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "email=$user_email" > /dev/null 2>&1
+        echo ""
+        print_success "You're on the list! We'll reach out when Coder1 is ready."
+    else
+        echo ""
+        echo "No problem. Learn more at https://coder1.ai"
+    fi
     echo ""
 }
 
 # Main installation flow
 main() {
     print_banner
+    ask_star_repo
 
     check_dependencies
     check_claude_code
@@ -343,6 +414,7 @@ main() {
 
     if verify_installation; then
         print_complete
+        ask_coder1_email
     else
         echo ""
         print_error "Installation completed with errors. Please check the messages above."

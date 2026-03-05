@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coder1 IDE Preview - The IDE Built for Claude Code Users</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --accent: #ff9500;
+            --accent-hover: #ff7b00;
+            --border: #2a2a3a;
+            --cyan: #00d4ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--cyan), #00a8cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .hero-image {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin: 2.5rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .feature-card h3 {
+            color: var(--cyan);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .screenshot {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 1.5rem 0;
+        }
+
+        .screenshot-caption {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: -1rem;
+            margin-bottom: 2rem;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 168, 204, 0.1));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            margin: 3rem 0;
+        }
+
+        .cta-section h2 {
+            margin-top: 0;
+            color: var(--cyan);
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--cyan), #00a8cc);
+            color: var(--bg-primary);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .faq {
+            margin: 3rem 0;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 0;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-item h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .comparison-table td:first-child {
+            color: var(--text-primary);
+        }
+
+        .check {
+            color: #22c55e;
+        }
+
+        .dash {
+            color: var(--text-secondary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../" class="back-link">&larr; Back to Claude Sessions</a>
+
+        <h1>Coder1 IDE</h1>
+        <p class="tagline">The IDE built specifically for Claude Code users</p>
+
+        <img src="images/coder1-main.png" alt="Coder1 IDE Interface" class="hero-image">
+
+        <h2>What is Coder1?</h2>
+        <p>
+            Claude Sessions handles session search. <strong>Coder1 handles everything else.</strong>
+        </p>
+        <p>
+            It's a full development environment designed from the ground up for AI-assisted coding with Claude Code.
+            Think VS Code, but rebuilt for the age of AI pair programming.
+        </p>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>Visual IDE</h3>
+                <p>Monaco editor, file explorer, integrated terminal - all the tools you know, optimized for Claude.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Persistent Memory</h3>
+                <p>Your AI remembers your coding patterns, preferences, and project context across all sessions.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Team Collaboration</h3>
+                <p>Real-time collaboration like Google Docs - for code. Share AI sessions with your team.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Session Search Built-in</h3>
+                <p>Everything Claude Sessions does, integrated natively. No extra tools needed.</p>
+            </div>
+        </div>
+
+        <h2>Persistent AI Memory</h2>
+        <p>
+            Coder1's memory system remembers your coding patterns, preferences, and project context.
+            It gets smarter the more you use it.
+        </p>
+        <img src="images/coder1-memory.png" alt="Coder1 Memory Feature" class="screenshot">
+        <p class="screenshot-caption">The Memory feature tour - AI that learns and grows with you</p>
+
+        <h2>Full Monaco Editor</h2>
+        <p>
+            The same powerful editor that powers VS Code, with syntax highlighting, IntelliSense,
+            and all your favorite shortcuts.
+        </p>
+        <img src="images/coder1-editor.png" alt="Coder1 Monaco Editor" class="screenshot">
+        <p class="screenshot-caption">Full VS Code editing power with AI integration</p>
+
+        <h2>Claude Sessions vs Coder1</h2>
+        <table class="comparison-table">
+            <tr>
+                <th>Feature</th>
+                <th>Claude Sessions</th>
+                <th>Coder1 IDE</th>
+            </tr>
+            <tr>
+                <td>Session search</td>
+                <td class="check">Yes</td>
+                <td class="check">Yes (built-in)</td>
+            </tr>
+            <tr>
+                <td>Auto-checkpoints</td>
+                <td class="check">Yes</td>
+                <td class="check">Yes</td>
+            </tr>
+            <tr>
+                <td>Visual IDE</td>
+                <td class="dash">-</td>
+                <td class="check">Yes</td>
+            </tr>
+            <tr>
+                <td>Monaco code editor</td>
+                <td class="dash">-</td>
+                <td class="check">Yes</td>
+            </tr>
+            <tr>
+                <td>AI-powered terminal</td>
+                <td class="dash">-</td>
+                <td class="check">Yes</td>
+            </tr>
+            <tr>
+                <td>Persistent memory</td>
+                <td class="dash">-</td>
+                <td class="check">Yes</td>
+            </tr>
+            <tr>
+                <td>Team collaboration</td>
+                <td class="dash">-</td>
+                <td class="check">Yes</td>
+            </tr>
+            <tr>
+                <td>One-click deployments</td>
+                <td class="dash">-</td>
+                <td class="check">Yes</td>
+            </tr>
+        </table>
+
+        <div class="cta-section">
+            <h2>Join the Alpha</h2>
+            <p>Currently invite-only. Get early access and help shape the future of AI-assisted development.</p>
+            <a href="https://coder1.ai?utm_source=claudesessions&utm_medium=docs&utm_campaign=preview_doc" class="cta-button">
+                Request Early Access
+            </a>
+        </div>
+
+        <div class="faq">
+            <h2>FAQ</h2>
+
+            <div class="faq-item">
+                <h3>Is Claude Sessions going away?</h3>
+                <p>No. Claude Sessions remains free and open source forever. It's a standalone tool that works great on its own.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Do I need Claude Sessions if I use Coder1?</h3>
+                <p>No - Coder1 has session management built-in. But if you prefer the CLI experience, they work great together too.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>What's the pricing?</h3>
+                <p>Coder1 is currently in alpha with free early access. Pricing will be announced when we launch publicly.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>When will Coder1 be available?</h3>
+                <p>We're onboarding alpha users now. Join the waitlist to get early access.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>
+            <a href="https://coder1.ai?utm_source=claudesessions&utm_medium=docs&utm_campaign=preview_doc">coder1.ai</a> &middot;
+            <a href="../">Back to Claude Sessions</a>
+        </p>
+    </footer>
+</body>
+</html>

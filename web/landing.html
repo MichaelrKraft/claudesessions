@@ -10,7 +10,7 @@
     <meta property="og:title" content="Claude Sessions - Find Any Session in Seconds">
     <meta property="og:description" content="Search your Claude Code sessions instantly. Full-text search, web dashboard, cross-directory access. 100% free.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://claudesessions.com">
+    <meta property="og:url" content="https://claudesession.com">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
@@ -641,6 +641,93 @@
             font-size: 0.875rem;
         }
 
+        /* Email Capture */
+        .email-capture {
+            margin: 2rem auto;
+            padding: 1.5rem;
+            max-width: 500px;
+            background: rgba(255, 149, 0, 0.08);
+            border: 1px solid rgba(255, 149, 0, 0.25);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .email-capture p {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .email-capture form {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .email-capture input {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            min-width: 250px;
+        }
+
+        .email-capture input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .email-capture button {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #ff9500, #ff6b00);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .email-capture button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+        }
+
+        /* Powered by Coder1 */
+        .powered-by {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .powered-by span {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .powered-by a {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .powered-by a:hover {
+            opacity: 1;
+        }
+
+        .powered-by img {
+            height: 84px;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero h1 {
@@ -682,7 +769,7 @@
         <div class="install-box reveal-up">
             <span class="install-label">Install in 30 seconds</span>
             <div class="install-command">
-                <code>curl -fsSL https://claudesessions.com/install.sh | bash</code>
+                <code>curl -fsSL https://claudesession.com/install.sh | bash</code>
                 <button class="copy-btn" onclick="copyCommand()">Copy</button>
             </div>
         </div>
@@ -908,18 +995,61 @@
             <a href="https://github.com/MichaelrKraft/claudesessions/issues">Report Issues</a>
             <a href="https://github.com/MichaelrKraft/claudesessions/blob/main/CONTRIBUTING.md">Contributing</a>
             <a href="https://github.com/MichaelrKraft/claudesessions/blob/main/LICENSE">MIT License</a>
+            <a href="docs/coder1-preview.html">See Coder1 IDE</a>
         </div>
-        <p class="footer-note" style="margin-bottom: 0.75rem;">
+
+        <!-- Email Capture -->
+        <div class="email-capture">
+            <p>Get Coder1 updates & early access</p>
+            <form id="email-form" onsubmit="handleEmailSubmit(event)">
+                <input type="email" id="email-input" name="email" placeholder="you@example.com" required>
+                <button type="submit">Subscribe</button>
+            </form>
+        </div>
+        <script>
+        async function handleEmailSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('email-input').value;
+            const btn = e.target.querySelector('button');
+            btn.textContent = 'Subscribing...';
+            btn.disabled = true;
+
+            try {
+                await fetch('https://buttondown.email/api/emails/embed-subscribe/Coder1', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'email=' + encodeURIComponent(email),
+                    mode: 'no-cors'
+                });
+                btn.textContent = 'Subscribed!';
+                setTimeout(() => {
+                    btn.textContent = 'Subscribe';
+                    btn.disabled = false;
+                    document.getElementById('email-input').value = '';
+                }, 2000);
+            } catch (err) {
+                btn.textContent = 'Subscribe';
+                btn.disabled = false;
+            }
+        }
+        </script>
+
+        <p class="footer-note">
             Built for the Claude Code community. Not affiliated with Anthropic.
         </p>
-        <p class="footer-note" style="font-size: 0.8rem;">
-            Built by the creator of <a href="https://coder1.ai" style="color: var(--accent); text-decoration: none;">Coder1 IDE</a>
-        </p>
+
+        <!-- Powered by Coder1 -->
+        <div class="powered-by">
+            <span>Powered by</span>
+            <a href="https://coder1.ai?utm_source=claudesessions&utm_medium=footer&utm_campaign=lead_magnet" target="_blank">
+                <img src="coder1-logo.png" alt="Coder1">
+            </a>
+        </div>
     </footer>
 
     <script>
         function copyCommand() {
-            const command = 'curl -fsSL https://claudesessions.com/install.sh | bash';
+            const command = 'curl -fsSL https://claudesession.com/install.sh | bash';
             navigator.clipboard.writeText(command).then(() => {
                 const btn = document.querySelector('.copy-btn');
                 btn.textContent = 'Copied!';
