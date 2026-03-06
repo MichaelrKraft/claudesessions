@@ -550,11 +550,7 @@
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 12px;
-            aspect-ratio: 16/9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-secondary);
+            overflow: hidden;
         }
 
         /* CTA Section */
@@ -937,8 +933,9 @@
         <h2 class="shiny-text reveal-up">See It In Action</h2>
         <p class="reveal-up">Watch how Claude Session saves and searches your work.</p>
         <div class="demo-placeholder reveal-up">
-            <!-- Demo video will be embedded here -->
-            Demo video coming soon
+            <video autoplay muted loop playsinline style="width: 100%; display: block; border-radius: 12px;">
+                <source src="claude-session-demo.mp4" type="video/mp4">
+            </video>
         </div>
     </section>
 
