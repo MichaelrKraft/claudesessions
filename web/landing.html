@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claude Sessions - Find Any Session in Seconds</title>
+    <title>Claude Session - Find Any Session in Seconds</title>
     <meta name="description" content="Search your Claude Code sessions instantly. Full-text search, web dashboard, cross-directory access. Everything Claude Code's native resume is missing. 100% free.">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="Claude Sessions - Find Any Session in Seconds">
+    <meta property="og:title" content="Claude Session - Find Any Session in Seconds">
     <meta property="og:description" content="Search your Claude Code sessions instantly. Full-text search, web dashboard, cross-directory access. 100% free.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://claudesession.com">
+    <meta property="og:image" content="https://claudesession.com/og-image.png">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Claude Sessions - Find Any Session in Seconds">
+    <meta name="twitter:title" content="Claude Session - Find Any Session in Seconds">
     <meta name="twitter:description" content="Search your Claude Code sessions instantly. Full-text search, web dashboard, cross-directory access. 100% free.">
+    <meta name="twitter:image" content="https://claudesession.com/og-image.png">
 
     <style>
         :root {
@@ -747,7 +749,7 @@
 </head>
 <body>
     <nav>
-        <a href="/" class="logo">claude<span>sessions</span></a>
+        <a href="/" class="logo">claude<span>session</span></a>
         <div class="nav-links">
             <a href="#features">Features</a>
             <a href="#how-it-works">How It Works</a>
@@ -806,7 +808,7 @@
     <!-- Comparison Table -->
     <section class="comparison" style="padding: 4rem 2rem;">
         <div style="max-width: 800px; margin: 0 auto;">
-            <h2 class="shiny-text reveal-up" style="font-size: 2rem; margin-bottom: 0.5rem; text-align: center;">Native Claude Code vs Claude Sessions</h2>
+            <h2 class="shiny-text reveal-up" style="font-size: 2rem; margin-bottom: 0.5rem; text-align: center;">Native Claude Code vs Claude Session</h2>
             <p class="reveal-up" style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Everything we add is 100% free</p>
             <div class="reveal-up" style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 12px; overflow: hidden;">
@@ -814,7 +816,7 @@
                         <tr style="background: var(--bg-secondary);">
                             <th style="padding: 1rem; text-align: left; border-bottom: 1px solid var(--border);">Feature</th>
                             <th style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--border);">Native Claude</th>
-                            <th style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--border); color: var(--accent);">Claude Sessions</th>
+                            <th style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--border); color: var(--accent);">Claude Session</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -931,9 +933,9 @@
 
     <section class="demo" id="demo">
         <h2 class="shiny-text reveal-up">See It In Action</h2>
-        <p class="reveal-up">Watch how Claude Sessions saves and searches your work.</p>
+        <p class="reveal-up">Watch how Claude Session saves and searches your work.</p>
         <div class="demo-placeholder reveal-up">
-            <video autoplay muted loop playsinline style="width: 100%; display: block; border-radius: 12px;">
+            <video autoplay muted loop playsinline preload="metadata" style="width: 100%; display: block; border-radius: 12px;">
                 <source src="claude-session-demo.mp4" type="video/mp4">
             </video>
         </div>
@@ -969,7 +971,7 @@
             </div>
 
             <form style="display: flex; gap: 0.5rem; max-width: 400px; margin: 0 auto;" onsubmit="handleWaitlist(event)">
-                <input type="email" placeholder="Enter your email" required style="flex: 1; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); font-size: 1rem;">
+                <input type="email" placeholder="Enter your email" required aria-label="Email address" style="flex: 1; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); font-size: 1rem;">
                 <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Join Waitlist</button>
             </form>
             <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.75rem;">Be the first to know when Cloud Pro launches</p>
@@ -992,14 +994,14 @@
             <a href="https://github.com/MichaelrKraft/claudesessions/issues">Report Issues</a>
             <a href="https://github.com/MichaelrKraft/claudesessions/blob/main/CONTRIBUTING.md">Contributing</a>
             <a href="https://github.com/MichaelrKraft/claudesessions/blob/main/LICENSE">MIT License</a>
-            <a href="docs/coder1-preview.html">See Coder1 IDE</a>
+            <a href="https://coder1.ai?utm_source=claudesession&utm_medium=footer&utm_campaign=see_coder1" target="_blank">See Coder1 IDE</a>
         </div>
 
         <!-- Email Capture -->
         <div class="email-capture">
             <p>Get Coder1 updates & early access</p>
             <form id="email-form" onsubmit="handleEmailSubmit(event)">
-                <input type="email" id="email-input" name="email" placeholder="you@example.com" required>
+                <input type="email" id="email-input" name="email" placeholder="you@example.com" required aria-label="Email address">
                 <button type="submit">Subscribe</button>
             </form>
         </div>
@@ -1058,22 +1060,30 @@
             });
         }
 
-        function handleWaitlist(event) {
+        async function handleWaitlist(event) {
             event.preventDefault();
             const form = event.target;
             const email = form.querySelector('input[type="email"]').value;
             const button = form.querySelector('button');
-
-            // For now, just show confirmation (will integrate with email service later)
-            button.textContent = 'Joined!';
-            button.style.background = '#22c55e';
-            form.querySelector('input').value = '';
-            form.querySelector('input').placeholder = 'Thanks! We\'ll be in touch.';
-            form.querySelector('input').disabled = true;
+            button.textContent = 'Joining...';
             button.disabled = true;
 
-            // Log for now - replace with actual API call
-            console.log('Waitlist signup:', email);
+            try {
+                await fetch('https://buttondown.email/api/emails/embed-subscribe/Coder1', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'email=' + encodeURIComponent(email) + '&tag=cloud-pro-waitlist',
+                    mode: 'no-cors'
+                });
+                button.textContent = 'Joined!';
+                button.style.background = '#22c55e';
+                form.querySelector('input').value = '';
+                form.querySelector('input').placeholder = 'Thanks! We\'ll be in touch.';
+                form.querySelector('input').disabled = true;
+            } catch (err) {
+                button.textContent = 'Join Waitlist';
+                button.disabled = false;
+            }
         }
 
         // Ripple Grid WebGL Effect
