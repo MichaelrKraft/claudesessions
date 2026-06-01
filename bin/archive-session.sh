@@ -65,6 +65,11 @@ Summary:"
 # === MAIN ===
 mkdir -p "$ARCHIVE_DIR"
 
+# Rotate log if > 1MB to prevent unbounded growth
+if [ -f "$LOG_FILE" ] && [ "$(wc -c < "$LOG_FILE" 2>/dev/null || echo 0)" -gt 1048576 ]; then
+    mv "$LOG_FILE" "${LOG_FILE}.1"
+fi
+
 # Detect project root by looking for common project markers
 detect_project_root() {
     local dir="$1"
@@ -218,6 +223,14 @@ $first_message
 EOF
 
 log "Archive complete: $session_archive"
+
+# Index into SQLite for search and context injection
+DB_MANAGER="$HOME/.claudesessions/bin/db-manager.sh"
+if [ -f "$DB_MANAGER" ]; then
+    "$DB_MANAGER" init 2>/dev/null || true
+    "$DB_MANAGER" index "$session_archive" 2>/dev/null || true
+    log "Indexed into SQLite: $archive_name"
+fi
 
 # Output success message
 echo "Session archived: $archive_name"
