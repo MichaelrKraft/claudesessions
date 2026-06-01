@@ -177,6 +177,12 @@ install_files() {
     chmod +x "$INSTALL_DIR/skills/scripts/"*.sh 2>/dev/null || true
     chmod +x "$INSTALL_DIR/skills/scripts/"*.py 2>/dev/null || true
 
+    # Install coder1-mem CLI alias (branded wrapper for sessions)
+    if [ -f "$INSTALL_DIR/bin/coder1-mem" ]; then
+        chmod +x "$INSTALL_DIR/bin/coder1-mem" 2>/dev/null || true
+        print_success "Installed coder1-mem CLI"
+    fi
+
     print_success "Files installed to $INSTALL_DIR"
 }
 
@@ -364,6 +370,8 @@ print_complete() {
     echo ""
     echo "  3. View your archives:"
     echo "     sessions list"
+    echo ""
+    echo "     You can now run: sessions list  OR  coder1-mem list"
     echo ""
     echo "  4. Sessions are auto-archived when you exit Claude Code"
     echo ""

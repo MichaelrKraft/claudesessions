@@ -51,6 +51,20 @@ CREATE TABLE IF NOT EXISTS transcript_chunks (
     tool_name TEXT,
     timestamp TEXT
 );
+
+CREATE TABLE IF NOT EXISTS codebase_graph (
+    project_root TEXT PRIMARY KEY,
+    project_name TEXT,
+    analyzed_at TEXT,
+    language TEXT,
+    framework TEXT,
+    file_count INTEGER DEFAULT 0,
+    module_count INTEGER DEFAULT 0,
+    entry_points TEXT,
+    architecture_summary TEXT,
+    understand_anything_present INTEGER DEFAULT 0,
+    raw_json TEXT
+);
 EOF
     echo "Database initialized: $DB_FILE"
 }
@@ -257,6 +271,58 @@ LIMIT 5;
 EOF
 }
 
+# Store a codebase analysis JSON into the codebase_graph table
+store_codebase_graph() {
+    local analysis_file="$1"
+
+    if [ -z "$analysis_file" ] || [ ! -f "$analysis_file" ]; then
+        echo "Error: analysis JSON not found: $analysis_file" >&2
+        return 1
+    fi
+
+    # Ensure DB + table exist
+    if [ ! -f "$DB_FILE" ]; then
+        init_db >/dev/null 2>&1 || true
+    fi
+    sqlite3 "$DB_FILE" "CREATE TABLE IF NOT EXISTS codebase_graph (project_root TEXT PRIMARY KEY, project_name TEXT, analyzed_at TEXT, language TEXT, framework TEXT, file_count INTEGER DEFAULT 0, module_count INTEGER DEFAULT 0, entry_points TEXT, architecture_summary TEXT, understand_anything_present INTEGER DEFAULT 0, raw_json TEXT);" 2>/dev/null || true
+
+    # Extract fields with jq (guarded)
+    local project_root project_name analyzed_at language framework
+    local file_count module_count entry_points architecture_summary ua_present raw_json
+
+    project_root=$(jq -r '.project_root // ""' "$analysis_file" 2>/dev/null || echo "")
+    project_name=$(jq -r '.project_name // ""' "$analysis_file" 2>/dev/null || echo "")
+    analyzed_at=$(jq -r '.analyzed_at // ""' "$analysis_file" 2>/dev/null || echo "")
+    language=$(jq -r '.language // ""' "$analysis_file" 2>/dev/null || echo "")
+    framework=$(jq -r '.framework // ""' "$analysis_file" 2>/dev/null || echo "")
+    file_count=$(jq -r '.file_count // 0' "$analysis_file" 2>/dev/null || echo "0")
+    module_count=$(jq -r '.module_count // 0' "$analysis_file" 2>/dev/null || echo "0")
+    entry_points=$(jq -c '.entry_points // []' "$analysis_file" 2>/dev/null || echo "[]")
+    architecture_summary=$(jq -r '.architecture_summary // ""' "$analysis_file" 2>/dev/null || echo "")
+    ua_present=$(jq -r 'if .understand_anything_present then 1 else 0 end' "$analysis_file" 2>/dev/null || echo "0")
+    raw_json=$(cat "$analysis_file" 2>/dev/null || echo "{}")
+
+    # Escape all string fields for SQL safety
+    local esc_root esc_name esc_at esc_lang esc_fw esc_entries esc_arch esc_raw
+    esc_root=$(escape_sql "$project_root")
+    esc_name=$(escape_sql "$project_name")
+    esc_at=$(escape_sql "$analyzed_at")
+    esc_lang=$(escape_sql "$language")
+    esc_fw=$(escape_sql "$framework")
+    esc_entries=$(escape_sql "$entry_points")
+    esc_arch=$(escape_sql "$architecture_summary")
+    esc_raw=$(escape_sql "$raw_json")
+
+    # Validate numeric fields
+    [[ "$file_count" =~ ^[0-9]+$ ]] || file_count=0
+    [[ "$module_count" =~ ^[0-9]+$ ]] || module_count=0
+    [[ "$ua_present" =~ ^[01]$ ]] || ua_present=0
+
+    sqlite3 "$DB_FILE" "INSERT OR REPLACE INTO codebase_graph (project_root, project_name, analyzed_at, language, framework, file_count, module_count, entry_points, architecture_summary, understand_anything_present, raw_json) VALUES ('$esc_root', '$esc_name', '$esc_at', '$esc_lang', '$esc_fw', $file_count, $module_count, '$esc_entries', '$esc_arch', $ua_present, '$esc_raw');" 2>/dev/null || true
+
+    echo "Stored codebase graph: $project_name ($project_root)"
+}
+
 # === MAIN ===
 case "${1:-help}" in
     init)       init_db ;;
@@ -266,18 +332,20 @@ case "${1:-help}" in
     get)        get_session "$2" ;;
     list)       list_recent "$2" ;;
     stats)      stats ;;
+    store-graph) store_codebase_graph "$2" ;;
     *)
         echo "Session Archive Database Manager"
         echo ""
         echo "Usage: db-manager.sh <command> [args]"
         echo ""
         echo "Commands:"
-        echo "  init              Initialize the database"
-        echo "  index <path>      Index a single session archive"
-        echo "  reindex           Reindex all sessions"
-        echo "  search <query>    Full-text search across sessions"
-        echo "  get <name>        Get session details"
-        echo "  list [n]          List recent sessions (default: 10)"
-        echo "  stats             Show archive statistics"
+        echo "  init               Initialize the database"
+        echo "  index <path>       Index a single session archive"
+        echo "  reindex            Reindex all sessions"
+        echo "  search <query>     Full-text search across sessions"
+        echo "  get <name>         Get session details"
+        echo "  list [n]           List recent sessions (default: 10)"
+        echo "  stats              Show archive statistics"
+        echo "  store-graph <path> Store a codebase-analysis.json file"
         ;;
 esac

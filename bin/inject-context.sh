@@ -89,6 +89,16 @@ if [ "$last_exit" = "interrupt" ] || [ "$last_exit" = "timeout" ]; then
     echo ""
 fi
 
+# ── Codebase ─────────────────────────────────────────────────────────────────
+cb_row=$(q "SELECT language || '|' || framework || '|' || file_count || '|' || module_count || '|' || COALESCE(architecture_summary, '') FROM codebase_graph WHERE project_root='$esc_root';")
+if [ -n "$cb_row" ]; then
+    IFS='|' read -r cb_lang cb_framework cb_files cb_modules cb_arch <<< "$cb_row"
+    echo "CODEBASE"
+    echo "  $cb_lang · $cb_framework · $cb_files files · $cb_modules modules"
+    [ -n "$cb_arch" ] && echo "  Architecture: $cb_arch"
+    echo ""
+fi
+
 # ── Tip ───────────────────────────────────────────────────────────────────────
 echo "Run 'sessions search <query>' to find specific past work."
 echo ""

@@ -518,6 +518,185 @@ cmd_credits() {
     fi
 }
 
+cmd_analyze() {
+    # Detect project root from cwd
+    local project_root="$(pwd)"
+    local dir="$project_root"
+    while [ "$dir" != "/" ] && [ -n "$dir" ]; do
+        for marker in ".git" "package.json" "Cargo.toml" "pyproject.toml" "go.mod"; do
+            if [ -e "$dir/$marker" ]; then
+                project_root="$dir"
+                break 2
+            fi
+        done
+        dir=$(dirname "$dir")
+    done
+
+    # Resolve analyzer location
+    local analyzer
+    if [ -f "$PROJECT_DIR/bin/analyze-codebase.sh" ]; then
+        analyzer="$PROJECT_DIR/bin/analyze-codebase.sh"
+    else
+        analyzer="$HOME/.claudesessions/bin/analyze-codebase.sh"
+    fi
+
+    if [ ! -f "$analyzer" ]; then
+        echo -e "${RED}analyze-codebase.sh not found${NC}"
+        return 1
+    fi
+
+    # Run analyzer (writes JSON + prints to stdout — we only need the file path)
+    bash "$analyzer" --root "$project_root" >/dev/null 2>&1
+
+    local analysis_file="$project_root/.claude/codebase-analysis.json"
+    if [ ! -f "$analysis_file" ]; then
+        echo -e "${RED}Analysis failed — no output file produced.${NC}"
+        return 1
+    fi
+
+    # Persist into DB
+    "$DB_MANAGER" store-graph "$analysis_file" >/dev/null 2>&1
+
+    # Extract fields for display
+    local project_name language framework file_count module_count
+    local ua_present ua_nodes architecture_summary
+    project_name=$(jq -r '.project_name // ""' "$analysis_file" 2>/dev/null)
+    language=$(jq -r '.language // "unknown"' "$analysis_file" 2>/dev/null)
+    framework=$(jq -r '.framework // "unknown"' "$analysis_file" 2>/dev/null)
+    file_count=$(jq -r '.file_count // 0' "$analysis_file" 2>/dev/null)
+    module_count=$(jq -r '.module_count // 0' "$analysis_file" 2>/dev/null)
+    ua_present=$(jq -r '.understand_anything_present // false' "$analysis_file" 2>/dev/null)
+    ua_nodes=$(jq -r '.understand_anything_nodes // 0' "$analysis_file" 2>/dev/null)
+    architecture_summary=$(jq -r '.architecture_summary // ""' "$analysis_file" 2>/dev/null)
+
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    printf "[coder1-mem] Codebase Analysis: %s\n" "$project_name"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    printf "Language:      %s (%s files)\n" "$language" "$file_count"
+    printf "Framework:     %s\n" "$framework"
+    printf "Modules:       %s\n" "$module_count"
+    echo ""
+
+    local entries
+    entries=$(jq -r '.entry_points[]? // empty' "$analysis_file" 2>/dev/null)
+    if [ -n "$entries" ]; then
+        echo "Entry points:"
+        echo "$entries" | while IFS= read -r ep; do
+            printf "  %s\n" "$ep"
+        done
+        echo ""
+    fi
+
+    local topdirs
+    topdirs=$(jq -r '.top_directories[]? // empty' "$analysis_file" 2>/dev/null)
+    if [ -n "$topdirs" ]; then
+        echo "Top directories:"
+        echo "$topdirs" | while IFS= read -r d; do
+            printf "  %s\n" "$d"
+        done
+        echo ""
+    fi
+
+    if [ "$ua_present" = "true" ]; then
+        printf "Knowledge graph: %s nodes\n" "$ua_nodes"
+        [ -n "$architecture_summary" ] && [ "$architecture_summary" != "null" ] && \
+            printf "Architecture:    %s\n" "$architecture_summary"
+    else
+        echo "Knowledge graph: not generated (run /understand in Claude Code for deeper insight)"
+    fi
+    echo ""
+}
+
+cmd_blast_radius() {
+    local task="$1"
+    if [ -z "$task" ]; then
+        echo "Usage: sessions blast-radius <task description>"
+        echo "Example: sessions blast-radius 'session capture pipeline'"
+        return 1
+    fi
+
+    # Detect project root
+    local project_root="$(pwd)"
+    local dir="$project_root"
+    while [ "$dir" != "/" ] && [ -n "$dir" ]; do
+        for marker in ".git" "package.json" "Cargo.toml" "pyproject.toml" "go.mod"; do
+            if [ -e "$dir/$marker" ]; then
+                project_root="$dir"
+                break 2
+            fi
+        done
+        dir=$(dirname "$dir")
+    done
+
+    local ua_graph="$project_root/.understand-anything/knowledge-graph.json"
+
+    # Extract keywords (split on whitespace, drop short tokens)
+    local keywords=()
+    local kw
+    for kw in $task; do
+        if [ "${#kw}" -ge 3 ]; then
+            keywords+=("$kw")
+        fi
+    done
+
+    if [ ${#keywords[@]} -eq 0 ]; then
+        echo "No usable keywords in task description (need 3+ char words)."
+        return 1
+    fi
+
+    local files=""
+    if [ -f "$ua_graph" ]; then
+        # Build a jq regex of keywords (case-insensitive)
+        local pattern
+        pattern=$(IFS='|'; echo "${keywords[*]}")
+        # Find nodes whose id/name/path matches; trace import edges (downstream impact)
+        files=$(jq -r --arg pat "$pattern" '
+            [.nodes[]? | select(
+                ((.id // "") | test($pat; "i")) or
+                ((.name // "") | test($pat; "i")) or
+                ((.path // "") | test($pat; "i"))
+            ) | (.path // .id // .name)] | unique[]
+        ' "$ua_graph" 2>/dev/null)
+    fi
+
+    if [ -z "$files" ]; then
+        # Fallback: git grep on keywords
+        if command -v git >/dev/null 2>&1 && [ -d "$project_root/.git" ]; then
+            local grep_args=()
+            for kw in "${keywords[@]}"; do
+                grep_args+=("-e" "$kw")
+            done
+            files=$(cd "$project_root" && git grep -l -I "${grep_args[@]}" 2>/dev/null | sort -u)
+        fi
+    fi
+
+    if [ -z "$files" ]; then
+        echo "No matching files found for: $task"
+        return 0
+    fi
+
+    local count
+    count=$(printf '%s\n' "$files" | wc -l | tr -d ' ')
+
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    printf "[coder1-mem] Blast Radius: %s\n" "$task"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    printf "Estimated blast radius: %s files\n" "$count"
+    echo ""
+    echo "Top affected files:"
+    printf '%s\n' "$files" | head -10 | while IFS= read -r f; do
+        printf "  %s\n" "$f"
+    done
+    if [ "$count" -gt 10 ] 2>/dev/null; then
+        printf "  ... and %d more\n" "$((count - 10))"
+    fi
+    echo ""
+}
+
 cmd_help() {
     echo -e "${BLUE}${BOLD}Claude Sessions - Never Lose Context${NC}"
     echo ""
@@ -532,6 +711,8 @@ cmd_help() {
     echo "  stats             Show archive statistics"
     echo "  export <session>  Export session (formats: md, json, txt)"
     echo "  reindex           Rebuild search index"
+    echo "  analyze           Analyze codebase structure (language, framework, modules)"
+    echo "  blast-radius <task>  Estimate files affected by a task description"
     echo ""
     echo -e "${CYAN}Pro Commands:${NC}"
     echo "  continue <session>  Restore session context (uses 1 credit)"
@@ -559,6 +740,8 @@ case "${1:-list}" in
     stats)      cmd_stats ;;
     export)     cmd_export "$2" "$3" ;;
     reindex)    cmd_reindex ;;
+    analyze)    cmd_analyze ;;
+    blast-radius) shift; cmd_blast_radius "$*" ;;
     continue)   cmd_continue "$2" ;;
     activate)   cmd_activate "$2" ;;
     credits)    cmd_credits ;;

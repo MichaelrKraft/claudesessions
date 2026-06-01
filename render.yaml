@@ -1,0 +1,32 @@
+# Render Blueprint for claudesessions Pro tier webhook API
+# https://render.com/docs/blueprint-spec
+#
+# To deploy:
+#   1. Push this repo to GitHub
+#   2. Render Dashboard -> New -> Blueprint -> connect repo
+#   3. Render reads this file, creates the service, asks for the 4 secret env vars
+#   4. Fill in secrets in the Render dashboard (they are never committed here)
+#
+# Secrets marked `sync: false` MUST be set manually in the Render dashboard.
+# See DEPLOY-MEM.md for the full step-by-step runbook.
+
+services:
+  - type: web
+    name: claudesessions-webhook
+    runtime: node
+    rootDir: api
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: FROM_EMAIL
+        sync: false
+      - key: NODE_ENV
+        value: production
