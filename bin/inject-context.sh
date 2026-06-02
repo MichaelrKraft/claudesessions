@@ -1,7 +1,8 @@
 #!/bin/bash
 # Coder1 Memory — Session Context Injection
 # Runs on Claude Code SessionStart hook
-# Outputs a structured morning standup briefing (stdout → injected as session context)
+# Emits JSON envelope: {"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"..."}}
+# Async hooks in CC 2.1.x discard raw stdout — output MUST be JSON-wrapped to appear as context.
 # Also writes a non-destructive context block to CLAUDE.md or .claude-context.md
 
 # No set -e — sqlite3 calls may return non-zero safely and must not abort the script
@@ -17,6 +18,20 @@ escape_sql() {
 # Safe sqlite3 query — returns empty string on error instead of aborting
 q() {
     sqlite3 "$DB_FILE" "$1" 2>/dev/null || echo ""
+}
+
+# Emit hook JSON envelope (additionalContext becomes the session-start injection)
+emit_context() {
+    local content="$1"
+    [ -z "$content" ] && return 0
+    if command -v jq >/dev/null 2>&1; then
+        jq -n --arg ctx "$content" '{hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:$ctx}}'
+    else
+        # jq missing → fall back to minimal manual escaping (newlines, quotes, backslashes)
+        local escaped
+        escaped=$(printf '%s' "$content" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' | awk 'BEGIN{ORS="\\n"}1')
+        printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$escaped"
+    fi
 }
 
 # Exit silently if no database exists yet
@@ -49,9 +64,7 @@ session_count=$(q "SELECT COUNT(*) FROM sessions WHERE working_directory LIKE '$
 
 # First-run: no sessions yet
 if ! [ "$session_count" -gt 0 ] 2>/dev/null; then
-    echo ""
-    echo "[coder1-mem] $project_name — No sessions yet. Your history builds automatically as you work."
-    echo ""
+    emit_context "[coder1-mem] $project_name — No sessions yet. Your history builds automatically as you work."
     exit 0
 fi
 
@@ -60,48 +73,52 @@ last_summary=$(q "SELECT COALESCE(summary, preview, '') FROM sessions WHERE work
 last_exit=$(q "SELECT COALESCE(exit_reason, 'normal') FROM sessions WHERE working_directory LIKE '$esc_root%' OR project_root='$esc_root' ORDER BY archived_at DESC LIMIT 1;")
 last_date=$(q "SELECT substr(archived_at, 1, 10) FROM sessions WHERE working_directory LIKE '$esc_root%' OR project_root='$esc_root' ORDER BY archived_at DESC LIMIT 1;")
 
-# ── Header ───────────────────────────────────────────────────────────────────
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-printf "[coder1-mem] %s · %s sessions · last: %s\n" "$project_name" "$session_count" "$last_date"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+# ── Build banner content into a buffer (subshell captures stdout) ────────────
+banner=$(
+    # ── Header ───────────────────────────────────────────────────────────────
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    printf "[coder1-mem] %s · %s sessions · last: %s\n" "$project_name" "$session_count" "$last_date"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
 
-# ── Last Session ─────────────────────────────────────────────────────────────
-echo "LAST SESSION"
-if [ -n "$last_summary" ] && [ "$last_summary" != "null" ]; then
-    short_summary=$(printf '%s' "$last_summary" | head -c 300)
-    echo "  $short_summary"
-else
-    echo "  (No summary available — run 'sessions reindex' to build summaries)"
-fi
-echo ""
-
-# ── Incomplete Session Detection ──────────────────────────────────────────────
-if [ "$last_exit" = "interrupt" ] || [ "$last_exit" = "timeout" ]; then
-    echo "⚠  INCOMPLETE SESSION DETECTED"
-    # Best-effort: extract a file reference from the summary text
-    last_file=$(printf '%s' "$last_summary" | grep -oE '[a-zA-Z0-9_/-]+\.(ts|tsx|js|jsx|py|sh|go|rs|rb|json|md)' | head -1)
-    if [ -n "$last_file" ]; then
-        echo "   Last work involved: $last_file"
+    # ── Last Session ─────────────────────────────────────────────────────────
+    echo "LAST SESSION"
+    if [ -n "$last_summary" ] && [ "$last_summary" != "null" ]; then
+        short_summary=$(printf '%s' "$last_summary" | head -c 300)
+        echo "  $short_summary"
+    else
+        echo "  (No summary available — run 'sessions reindex' to build summaries)"
     fi
-    echo "   → Resume this work, or describe a new task to start fresh."
     echo ""
-fi
 
-# ── Codebase ─────────────────────────────────────────────────────────────────
-cb_row=$(q "SELECT language || '|' || framework || '|' || file_count || '|' || module_count || '|' || COALESCE(architecture_summary, '') FROM codebase_graph WHERE project_root='$esc_root';")
-if [ -n "$cb_row" ]; then
-    IFS='|' read -r cb_lang cb_framework cb_files cb_modules cb_arch <<< "$cb_row"
-    echo "CODEBASE"
-    echo "  $cb_lang · $cb_framework · $cb_files files · $cb_modules modules"
-    [ -n "$cb_arch" ] && echo "  Architecture: $cb_arch"
-    echo ""
-fi
+    # ── Incomplete Session Detection ─────────────────────────────────────────
+    if [ "$last_exit" = "interrupt" ] || [ "$last_exit" = "timeout" ]; then
+        echo "⚠  INCOMPLETE SESSION DETECTED"
+        last_file=$(printf '%s' "$last_summary" | grep -oE '[a-zA-Z0-9_/-]+\.(ts|tsx|js|jsx|py|sh|go|rs|rb|json|md)' | head -1)
+        if [ -n "$last_file" ]; then
+            echo "   Last work involved: $last_file"
+        fi
+        echo "   → Resume this work, or describe a new task to start fresh."
+        echo ""
+    fi
 
-# ── Tip ───────────────────────────────────────────────────────────────────────
-echo "Run 'sessions search <query>' to find specific past work."
-echo ""
+    # ── Codebase ─────────────────────────────────────────────────────────────
+    cb_row=$(q "SELECT language || '|' || framework || '|' || file_count || '|' || module_count || '|' || COALESCE(architecture_summary, '') FROM codebase_graph WHERE project_root='$esc_root';")
+    if [ -n "$cb_row" ]; then
+        IFS='|' read -r cb_lang cb_framework cb_files cb_modules cb_arch <<< "$cb_row"
+        echo "CODEBASE"
+        echo "  $cb_lang · $cb_framework · $cb_files files · $cb_modules modules"
+        [ -n "$cb_arch" ] && echo "  Architecture: $cb_arch"
+        echo ""
+    fi
+
+    # ── Tip ──────────────────────────────────────────────────────────────────
+    echo "Run 'sessions search <query>' to find specific past work."
+)
+
+# Emit JSON envelope so async hook output reaches the session as context
+emit_context "$banner"
 
 # ── CLAUDE.md Context Write (non-destructive, marker-based) ──────────────────
 write_context_block() {
