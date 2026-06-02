@@ -3,11 +3,12 @@
   "hooks": {
     "SessionStart": [
       {
+        "matcher": "startup|clear|compact",
         "hooks": [
           {
             "type": "command",
-            "shell": "bash",
-            "command": "_R=\"${CLAUDE_PLUGIN_ROOT:-$HOME/claudesessions}\"; \"$_R/bin/inject-context.sh\"",
+            "command": "${CLAUDE_PLUGIN_ROOT}/bin/inject-context.sh",
+            "async": false,
             "timeout": 5
           }
         ]
@@ -18,8 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "shell": "bash",
-            "command": "_R=\"${CLAUDE_PLUGIN_ROOT:-$HOME/claudesessions}\"; \"$_R/bin/archive-session.sh\"",
+            "command": "${CLAUDE_PLUGIN_ROOT}/bin/archive-session.sh",
             "timeout": 30
           }
         ]
