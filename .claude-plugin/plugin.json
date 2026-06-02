@@ -1,0 +1,19 @@
+{
+  "name": "coder1-mem",
+  "version": "1.0.0",
+  "description": "Persistent session memory + codebase intelligence for Claude Code. Auto-captures every session, surfaces a morning standup briefing on session start, and provides CLI commands for cross-project search, codebase analysis, and blast-radius pre-flight.",
+  "author": {
+    "name": "Mike Kraft"
+  },
+  "homepage": "https://claudesession.com",
+  "repository": "https://github.com/MichaelrKraft/claudesessions",
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "session",
+    "context",
+    "fts5",
+    "sqlite",
+    "codebase-intelligence"
+  ]
+}

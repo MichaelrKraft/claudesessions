@@ -1,0 +1,25 @@
+{
+  "name": "claudesessions",
+  "owner": {
+    "name": "Mike Kraft"
+  },
+  "metadata": {
+    "description": "coder1-mem — persistent session memory + codebase intelligence for Claude Code",
+    "homepage": "https://claudesession.com"
+  },
+  "plugins": [
+    {
+      "name": "coder1-mem",
+      "source": "./",
+      "version": "1.0.0",
+      "description": "Persistent session memory + codebase intelligence",
+      "author": {
+        "name": "Mike Kraft"
+      },
+      "homepage": "https://claudesession.com",
+      "repository": "https://github.com/MichaelrKraft/claudesessions",
+      "license": "MIT",
+      "category": "productivity"
+    }
+  ]
+}

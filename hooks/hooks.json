@@ -1,0 +1,29 @@
+{
+  "description": "coder1-mem hooks — SessionStart briefing injection + Stop hook session capture",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "_R=\"${CLAUDE_PLUGIN_ROOT:-$HOME/claudesessions}\"; \"$_R/bin/inject-context.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "_R=\"${CLAUDE_PLUGIN_ROOT:-$HOME/claudesessions}\"; \"$_R/bin/archive-session.sh\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
