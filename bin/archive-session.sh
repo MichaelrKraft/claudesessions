@@ -140,6 +140,14 @@ mkdir -p "$session_archive"
 cp "$transcript_path" "$session_archive/transcript.jsonl"
 log "Copied transcript to: $session_archive/transcript.jsonl"
 
+# SessionEnd fires repeatedly for one session (resume, /clear, compaction), and each copy
+# holds the whole transcript so far. Drop the transcript from older archives of this
+# session; their metadata stays so search results still resolve.
+for older in "$ARCHIVE_DIR"/*_"${session_id:0:8}"; do
+    [ "$older" = "$session_archive" ] && continue
+    [ -f "$older/transcript.jsonl" ] && rm -f "$older/transcript.jsonl"
+done
+
 # Extract session statistics
 user_messages=$(jq -s '[.[] | select(.type == "user" or .type == "user_message")] | length' "$session_archive/transcript.jsonl" 2>/dev/null || echo "0")
 assistant_messages=$(jq -s '[.[] | select(.type == "assistant" or .type == "assistant_message")] | length' "$session_archive/transcript.jsonl" 2>/dev/null || echo "0")
